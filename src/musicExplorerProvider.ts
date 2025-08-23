@@ -1,32 +1,40 @@
 import * as vscode from 'vscode';
 import { TrackInfo } from './musicService';
 
-export class MusicCornerWidget {
-    private statusBarItem: vscode.StatusBarItem;
-    private webviewPanel: vscode.WebviewPanel | undefined;
+export class MusicExplorerProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'musicExplorer';
+
+    private _view?: vscode.WebviewView;
     private currentTrack: TrackInfo | null = null;
     private onControlCallback?: (action: string) => void;
-    private isCompactMode = false;
 
-    constructor(private readonly extensionUri: vscode.Uri) {
-        // Create a more prominent status bar item for the corner widget
-        this.statusBarItem = vscode.window.createStatusBarItem(
-            vscode.StatusBarAlignment.Right,
-            1000 // High priority to appear at the far right
-        );
-        this.setupStatusBarItem();
-    }
+    constructor(private readonly extensionUri: vscode.Uri) { }
 
-    private setupStatusBarItem() {
-        this.statusBarItem.command = 'music.toggleCornerWidget';
-        this.statusBarItem.show();
-        this.updateStatusBar();
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
+
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [this.extensionUri]
+        };
+
+        webviewView.webview.html = this.getHtmlForWebview();
+        this.setupWebviewMessageHandling();
+
+        // Update with current track if available
+        if (this.currentTrack) {
+            this.updateTrack(this.currentTrack);
+        }
     }
 
     public updateTrack(track: TrackInfo | null) {
         this.currentTrack = track;
-        if (this.webviewPanel) {
-            this.webviewPanel.webview.postMessage({
+        if (this._view) {
+            this._view.webview.postMessage({
                 command: 'updateTrack',
                 track: track
             });
@@ -34,125 +42,20 @@ export class MusicCornerWidget {
     }
 
     public updatePosition(position: number) {
-        if (this.webviewPanel && this.currentTrack) {
-            this.webviewPanel.webview.postMessage({
+        if (this._view && this.currentTrack) {
+            this._view.webview.postMessage({
                 command: 'updateProgress',
                 position: position
             });
         }
-    } private updateStatusBar() {
-        if (!this.currentTrack) {
-            this.statusBarItem.text = '$(music) Music';
-            this.statusBarItem.tooltip = 'No music playing • Click to open music widget';
-            this.statusBarItem.backgroundColor = undefined;
-            return;
-        }
-
-        const icon = this.getStatusIcon(this.currentTrack.status);
-        const title = this.truncateText(this.currentTrack.title, 20);
-        const artist = this.truncateText(this.currentTrack.artist, 15);
-
-        this.statusBarItem.text = `${icon} ${title} • ${artist}`;
-        this.statusBarItem.tooltip = this.createTooltip(this.currentTrack);
-
-        // Add subtle background color when playing
-        if (this.currentTrack.status === 'playing') {
-            this.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
-        } else {
-            this.statusBarItem.backgroundColor = undefined;
-        }
-    }
-
-    private getStatusIcon(status: string): string {
-        switch (status) {
-            case 'playing': return '$(play-circle)';
-            case 'paused': return '$(debug-pause)';
-            case 'stopped': return '$(primitive-square)';
-            default: return '$(music)';
-        }
-    }
-
-    private truncateText(text: string, maxLength: number): string {
-        if (text.length <= maxLength) {
-            return text;
-        }
-        return text.substring(0, maxLength - 1) + '…';
-    }
-
-    private createTooltip(track: TrackInfo): string {
-        let tooltip = `🎵 ${track.title}\\n👤 ${track.artist}`;
-        if (track.album) {
-            tooltip += `\\n💿 ${track.album}`;
-        }
-        if (track.duration && track.position) {
-            const progress = this.formatTime(track.position) + ' / ' + this.formatTime(track.duration);
-            tooltip += `\\n⏰ ${progress}`;
-        }
-        tooltip += `\\n▶ Status: ${track.status}`;
-        tooltip += '\\n\\n🖱️ Click to toggle corner music widget';
-        return tooltip;
-    }
-
-    private formatTime(seconds: number): string {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-
-    public toggleCornerWidget() {
-        if (this.webviewPanel) {
-            this.hideCornerWidget();
-        } else {
-            this.showCornerWidget();
-        }
-    }
-
-    public showCornerWidget() {
-        if (this.webviewPanel) {
-            this.webviewPanel.reveal();
-            return;
-        }
-
-        // Create a small webview panel positioned as an overlay
-        this.webviewPanel = vscode.window.createWebviewPanel(
-            'musicCornerWidget',
-            'Music',
-            {
-                viewColumn: vscode.ViewColumn.Beside,
-                preserveFocus: true
-            },
-            {
-                enableScripts: true,
-                retainContextWhenHidden: true,
-                localResourceRoots: [this.extensionUri]
-            }
-        );
-
-        this.webviewPanel.webview.html = this.getCornerWidgetContent();
-        this.setupWebviewMessageHandling();
-
-        this.webviewPanel.onDidDispose(() => {
-            this.webviewPanel = undefined;
-        });
-
-        if (this.currentTrack) {
-            this.updateTrack(this.currentTrack);
-        }
-    }
-
-    public hideCornerWidget() {
-        if (this.webviewPanel) {
-            this.webviewPanel.dispose();
-            this.webviewPanel = undefined;
-        }
     }
 
     private setupWebviewMessageHandling() {
-        if (!this.webviewPanel) {
+        if (!this._view) {
             return;
         }
 
-        this.webviewPanel.webview.onDidReceiveMessage(message => {
+        this._view.webview.onDidReceiveMessage(message => {
             switch (message.command) {
                 case 'playPause':
                 case 'nextTrack':
@@ -160,9 +63,6 @@ export class MusicCornerWidget {
                     if (this.onControlCallback) {
                         this.onControlCallback(message.command);
                     }
-                    break;
-                case 'close':
-                    this.hideCornerWidget();
                     break;
             }
         });
@@ -172,13 +72,13 @@ export class MusicCornerWidget {
         this.onControlCallback = callback;
     }
 
-    private getCornerWidgetContent(): string {
+    private getHtmlForWebview(): string {
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Widget</title>
+    <title>Music Explorer</title>
     <style>
         * {
             margin: 0;
@@ -190,56 +90,16 @@ export class MusicCornerWidget {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background: #000000;
             color: #ffffff;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            padding: 16px;
             min-height: 100vh;
         }
         
-        .corner-widget {
-            width: 340px;
+        .music-explorer {
             background: #111111;
             border: 1px solid #333333;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-        }
-        
-        .widget-header {
-            background: #222222;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333333;
-        }
-        
-        .widget-title {
-            font-weight: 600;
-            font-size: 14px;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .close-btn {
-            background: #333333;
-            border: 1px solid #555555;
-            color: #ffffff;
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-        
-        .close-btn:hover {
-            background: #444444;
-        }
-        
-        .widget-content {
-            padding: 20px;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
         
         .track-info {
@@ -252,42 +112,34 @@ export class MusicCornerWidget {
             font-size: 16px;
             margin-bottom: 8px;
             color: #ffffff;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
             line-height: 1.3;
+            word-wrap: break-word;
         }
         
         .track-artist {
             font-size: 14px;
             color: #bbbbbb;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
             margin-bottom: 4px;
+            font-weight: 500;
         }
         
         .track-album {
             font-size: 12px;
             color: #888888;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            opacity: 0.8;
             font-style: italic;
+            opacity: 0.8;
         }
         
         .status-indicator {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 10px;
             margin-bottom: 8px;
+            font-weight: bold;
         }
         
         .status-playing {
@@ -311,9 +163,9 @@ export class MusicCornerWidget {
         
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 4px;
             background: #333333;
-            border-radius: 3px;
+            border-radius: 2px;
             overflow: hidden;
             margin-bottom: 8px;
         }
@@ -321,14 +173,14 @@ export class MusicCornerWidget {
         .progress-fill {
             height: 100%;
             background: #007ACC;
-            border-radius: 3px;
+            border-radius: 2px;
             transition: width 0.5s ease;
         }
         
         .progress-time {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 11px;
             color: #bbbbbb;
             font-weight: 500;
         }
@@ -337,19 +189,19 @@ export class MusicCornerWidget {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             margin-top: 16px;
         }
         
         .control-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             background: #333333;
             color: #ffffff;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -367,11 +219,11 @@ export class MusicCornerWidget {
         }
         
         .control-btn.play-pause {
-            width: 48px;
-            height: 48px;
-            font-size: 18px;
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            font-size: 16px;
             background: #007ACC;
+            border-radius: 8px;
         }
         
         .control-btn.play-pause:hover {
@@ -395,24 +247,18 @@ export class MusicCornerWidget {
         }
         
         .music-icon {
-            font-size: 28px;
+            font-size: 24px;
             margin-bottom: 8px;
             opacity: 0.8;
         }
     </style>
 </head>
 <body>
-    <div class="corner-widget">
-        <div class="widget-header">
-            <div class="widget-title">🎵 Now Playing</div>
-            <button class="close-btn" onclick="sendCommand('close')">✕</button>
-        </div>
-        <div class="widget-content">
-            <div id="musicContent">
-                <div class="no-music">
-                    <div class="no-music-icon">🎵</div>
-                    <div>No music currently playing</div>
-                </div>
+    <div class="music-explorer">
+        <div id="musicContent">
+            <div class="no-music">
+                <div class="no-music-icon">🎵</div>
+                <div>No music currently playing</div>
             </div>
         </div>
     </div>
@@ -489,8 +335,7 @@ export class MusicCornerWidget {
             
             if (!currentTrack) {
                 content.innerHTML = \`
-                    <div class="no-music">
-                        <div class="no-music-icon">🎵</div>
+                    <div class="no-music"> 
                         <div>No music currently playing</div>
                     </div>
                 \`;
@@ -505,8 +350,7 @@ export class MusicCornerWidget {
                               currentTrack.status === 'paused' ? '⏸' : '⏹';
 
             content.innerHTML = \`
-                <div class="track-info">
-                    <div class="music-icon">🎵</div>
+                <div class="track-info"> 
                     <div class="status-indicator status-\${currentTrack.status}">
                         \${statusIcon}
                     </div>
@@ -550,12 +394,5 @@ export class MusicCornerWidget {
     </script>
 </body>
 </html>`;
-    }
-
-    public dispose() {
-        this.statusBarItem.dispose();
-        if (this.webviewPanel) {
-            this.webviewPanel.dispose();
-        }
     }
 }

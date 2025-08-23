@@ -5,7 +5,6 @@ export interface TrackInfo {
     title: string;
     artist: string;
     album: string;
-    albumArt?: string;
     duration?: number;
     position?: number;
     status: 'playing' | 'paused' | 'stopped';
@@ -15,6 +14,7 @@ export class MusicService {
     private updateInterval: NodeJS.Timeout | null = null;
     private currentTrack: TrackInfo | null = null;
     private onTrackChangedCallback?: (track: TrackInfo | null) => void;
+    private onPositionChangedCallback?: (position: number) => void;
     private isPlayerctlAvailable = false;
 
     constructor() {
@@ -69,7 +69,7 @@ export class MusicService {
         const playerctl = spawn('playerctl', [
             'metadata',
             '--format',
-            '{{title}}|{{artist}}|{{album}}|{{mpris:artUrl}}|{{duration(position)}}|{{duration(mpris:length)}}|{{status}}'
+            '{{title}}|{{artist}}|{{album}}|{{duration(position)}}|{{duration(mpris:length)}}|{{status}}'
         ]);
 
         let output = '';
@@ -80,15 +80,14 @@ export class MusicService {
         playerctl.on('exit', (code) => {
             if (code === 0 && output.trim()) {
                 const parts = output.trim().split('|');
-                if (parts.length >= 7) {
+                if (parts.length >= 6) {
                     const trackInfo: TrackInfo = {
                         title: parts[0] || 'Unknown Title',
                         artist: parts[1] || 'Unknown Artist',
                         album: parts[2] || 'Unknown Album',
-                        albumArt: parts[3] || undefined,
-                        position: this.parseDuration(parts[4]),
-                        duration: this.parseDuration(parts[5]),
-                        status: this.mapPlaybackStatus(parts[6])
+                        position: this.parseDuration(parts[3]),
+                        duration: this.parseDuration(parts[4]),
+                        status: this.mapPlaybackStatus(parts[5])
                     };
                     this.setCurrentTrack(trackInfo);
                 } else {
@@ -128,9 +127,27 @@ export class MusicService {
     }
 
     private setCurrentTrack(track: TrackInfo | null) {
+        const wasPlayingBefore = this.currentTrack?.status === 'playing';
+        const isPlayingNow = track?.status === 'playing';
+        const trackChanged = !this.currentTrack ||
+            !track ||
+            this.currentTrack.title !== track.title ||
+            this.currentTrack.artist !== track.artist ||
+            this.currentTrack.status !== track.status;
+
+        const positionChanged = this.currentTrack && track &&
+            Math.abs((this.currentTrack.position || 0) - (track.position || 0)) > 2; // Allow 2 second tolerance
+
         this.currentTrack = track;
-        if (this.onTrackChangedCallback) {
-            this.onTrackChangedCallback(track);
+
+        // Always fire for track changes, or when playback starts/stops
+        if (trackChanged || wasPlayingBefore !== isPlayingNow) {
+            if (this.onTrackChangedCallback) {
+                this.onTrackChangedCallback(track);
+            }
+        } else if (positionChanged && track?.position !== undefined && this.onPositionChangedCallback) {
+            // Fire position updates for playing tracks
+            this.onPositionChangedCallback(track.position);
         }
     }
 
@@ -142,13 +159,21 @@ export class MusicService {
         this.onTrackChangedCallback = callback;
     }
 
+    public onPositionChanged(callback: (position: number) => void) {
+        this.onPositionChangedCallback = callback;
+    }
+
     public async playPause() {
+        console.log("Toggling play/pause");
+
         if (!this.isPlayerctlAvailable) {
             vscode.window.showWarningMessage('playerctl is not available. Please install it to control music playback.');
             return;
         }
         try {
+            console.log("Current track:", this.currentTrack);
             spawn('playerctl', ['play-pause']);
+
         } catch (error) {
             console.error('Error toggling play/pause:', error);
             vscode.window.showErrorMessage('Failed to toggle play/pause');
@@ -167,7 +192,7 @@ export class MusicService {
             console.error('Error skipping to next track:', error);
             vscode.window.showErrorMessage('Failed to skip to next track');
         }
-    }
+    };
 
     public async previousTrack() {
         if (!this.isPlayerctlAvailable) {

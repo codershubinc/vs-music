@@ -16,6 +16,7 @@ export class MusicStatusBarWidget {
 
         this.statusBarItem = vscode.window.createStatusBarItem(alignment, priority);
         this.setupStatusBarItem();
+
     }
 
     private setupStatusBarItem() {

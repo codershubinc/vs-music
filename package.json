@@ -1,6 +1,6 @@
 {
   "name": "music",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "vs-music",
   "author": "VS Music Extension",
   "license": "MIT",
@@ -59,8 +59,34 @@
         "command": "music.showPanel",
         "title": "Music: Show Music Panel",
         "icon": "$(music)"
+      },
+      {
+        "command": "music.refreshExplorer",
+        "title": "Refresh",
+        "icon": "$(refresh)"
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "musicExplorer",
+          "name": "Music Player",
+          "when": "true",
+          "icon": "$(music)",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "music.refreshExplorer",
+          "when": "view == musicExplorer",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "VS Music",
       "properties": {

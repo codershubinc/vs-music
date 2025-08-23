@@ -2,31 +2,60 @@ import * as vscode from 'vscode';
 import { MusicService } from './musicService';
 import { MusicStatusBarWidget } from './musicStatusBar';
 import { MusicCornerWidget } from './musicCornerWidget';
+import { MusicExplorerProvider } from './musicExplorerProvider';
 
 export class MusicController {
     private musicService: MusicService;
     private statusBarWidget: MusicStatusBarWidget;
     private cornerWidget: MusicCornerWidget;
+    private explorerProvider: MusicExplorerProvider;
     private disposables: vscode.Disposable[] = [];
 
     constructor(context: vscode.ExtensionContext) {
         this.musicService = new MusicService();
         this.statusBarWidget = new MusicStatusBarWidget();
         this.cornerWidget = new MusicCornerWidget(context.extensionUri);
+        this.explorerProvider = new MusicExplorerProvider(context.extensionUri);
 
+        this.setupWebviewView(context);
         this.setupEventHandlers();
         this.registerCommands(context);
+    }
+
+    private setupWebviewView(context: vscode.ExtensionContext) {
+        const provider = vscode.window.registerWebviewViewProvider(
+            MusicExplorerProvider.viewType,
+            this.explorerProvider
+        );
+
+        context.subscriptions.push(provider);
     }
 
     private setupEventHandlers() {
         // Listen for track changes from music service
         this.musicService.onTrackChanged((track) => {
             this.statusBarWidget.updateTrack(track);
-            this.cornerWidget.updateTrack(track);
+            this.explorerProvider.updateTrack(track);
+
+            if (this.cornerWidget) {
+                this.cornerWidget.updateTrack(track);
+            }
         });
 
-        // Listen for control commands from corner widget
+        this.musicService.onPositionChanged((position) => {
+            // Send position updates to all webviews
+            this.explorerProvider.updatePosition(position);
+
+            if (this.cornerWidget) {
+                this.cornerWidget.updatePosition(position);
+            }
+        });        // Listen for control commands from corner widget
         this.cornerWidget.onControl((action: string) => {
+            this.handleControlAction(action);
+        });
+
+        // Listen for control commands from explorer provider
+        this.explorerProvider.onControl((action: string) => {
             this.handleControlAction(action);
         });
 
@@ -59,6 +88,11 @@ export class MusicController {
             }),
             vscode.commands.registerCommand('music.previousTrack', () => {
                 this.musicService.previousTrack();
+            }),
+            vscode.commands.registerCommand('music.refreshExplorer', () => {
+                // Refresh by updating with current track
+                const currentTrack = this.musicService.getCurrentTrack();
+                this.explorerProvider.updateTrack(currentTrack);
             })
         ];
 
@@ -89,6 +123,7 @@ export class MusicController {
         const currentTrack = this.musicService.getCurrentTrack();
         if (currentTrack) {
             this.statusBarWidget.updateTrack(currentTrack);
+            this.explorerProvider.updateTrack(currentTrack);
         }
     }
 
