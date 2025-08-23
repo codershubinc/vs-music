@@ -1,0 +1,138 @@
+{
+    "name": "music-crossplatform",
+    "displayName": "Music Player - Cross Platform",
+    "description": "Cross-platform music player widget for VS Code - works on Windows, macOS, and Linux",
+    "version": "1.0.0",
+    "engines": {
+        "vscode": "^1.74.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./dist/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "music.showCornerWidget",
+                "title": "Show Corner Widget",
+                "category": "Music"
+            },
+            {
+                "command": "music.hideCornerWidget", 
+                "title": "Hide Corner Widget",
+                "category": "Music"
+            },
+            {
+                "command": "music.showMusicPanel",
+                "title": "Show Music Panel",
+                "category": "Music"
+            },
+            {
+                "command": "music.playPause",
+                "title": "Play/Pause",
+                "category": "Music"
+            },
+            {
+                "command": "music.nextTrack",
+                "title": "Next Track",
+                "category": "Music"
+            },
+            {
+                "command": "music.previousTrack",
+                "title": "Previous Track",
+                "category": "Music"
+            },
+            {
+                "command": "music.refreshMusicExplorer",
+                "title": "Refresh",
+                "icon": "$(refresh)"
+            }
+        ],
+        "views": {
+            "explorer": [
+                {
+                    "type": "webview",
+                    "id": "musicExplorer",
+                    "name": "Music",
+                    "when": "true"
+                }
+            ]
+        },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "music.refreshMusicExplorer",
+                    "when": "view == musicExplorer",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "Music",
+            "properties": {
+                "music.updateInterval": {
+                    "type": "number",
+                    "default": 1000,
+                    "description": "Update interval for music information in milliseconds",
+                    "minimum": 500,
+                    "maximum": 5000
+                },
+                "music.showInStatusBar": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show music information in status bar"
+                },
+                "music.enableCornerWidget": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable corner widget display"
+                },
+                "music.platform.windows.useMediaControl": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use Windows Media Control API for music detection"
+                },
+                "music.platform.macos.useAppleScript": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use AppleScript for music detection on macOS"
+                },
+                "music.platform.linux.usePlayerctl": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use playerctl for music detection on Linux"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "bun run package",
+        "compile": "webpack",
+        "watch": "webpack --watch",
+        "package": "webpack --mode production --devtool hidden-source-map",
+        "compile-tests": "tsc -p . --outDir out",
+        "watch-tests": "tsc -p . -w --outDir out",
+        "pretest": "bun run compile-tests && bun run compile && bun run lint",
+        "lint": "eslint src --ext ts",
+        "test": "vscode-test"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.74.0",
+        "@types/node": "20.x",
+        "@typescript-eslint/eslint-plugin": "^6.13.1",
+        "@typescript-eslint/parser": "^6.13.1",
+        "@vscode/test-cli": "^0.0.4",
+        "@vscode/test-electron": "^2.3.8",
+        "eslint": "^8.54.0",
+        "typescript": "^5.3.2",
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4",
+        "ts-loader": "^9.5.1"
+    },
+    "dependencies": {
+        "node-powershell": "^4.0.0"
+    }
+}
