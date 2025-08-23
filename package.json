@@ -1,13 +1,32 @@
 {
   "name": "music",
-  "version": "0.0.2",
-  "publisher": "vs-music",
-  "author": "VS Music Extension",
+  "version": "0.1.1",
+  "publisher": "codershubinc",
+  "author": "Swapnil Ingle",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/vs-music"
+    "url": "https://github.com/codershubinc/vscode-music"
   },
+  "bugs": {
+    "url": "https://github.com/codershubinc/vscode-music/issues"
+  },
+  "homepage": "https://github.com/codershubinc/vscode-music#readme",
+  "keywords": [
+    "music",
+    "player",
+    "spotify",
+    "linux",
+    "playerctl",
+    "mpris",
+    "status-bar",
+    "media-control",
+    "audio",
+    "playback",
+    "music-info",
+    "vlc",
+    "rhythmbox"
+  ],
   "main": "./dist/extension.js",
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -129,6 +148,7 @@
   },
   "description": "Display currently playing music info and controls in VS Code",
   "displayName": "VS Music",
+  "icon": "ico.png",
   "engines": {
     "vscode": "^1.103.0"
   },
