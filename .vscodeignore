@@ -1,0 +1,64 @@
+# Build and development files
+.vscode/**
+.vscode-test/**
+out/**
+node_modules/**
+src/**
+dist/**
+
+# Configuration files
+webpack.config.js
+tsconfig.json
+eslint.config.mjs
+.eslintrc.*
+.gitignore
+.yarnrc
+bun.lock
+package-lock.json
+yarn.lock
+
+# Documentation (keep only essential ones)
+vsc-extension-quickstart.md
+
+# Test files
+**/*.test.*
+**/*.spec.*
+test/**
+
+# Source maps and TypeScript files
+**/*.map
+**/*.ts
+!dist/**/*.js
+
+# Development assets
+.vscode-test.*
+*.vsix
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+.nyc_output
+coverage/
+.coverage
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# Keep essential files for marketplace
+!README.md
+!CHANGELOG.md
+!LICENSE
+!package.json
