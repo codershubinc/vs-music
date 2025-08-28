@@ -4,7 +4,7 @@
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Publisher](https://img.shields.io/badge/Publisher-codershubinc-orange)
-![Version](https://img.shields.io/badge/Version-0.0.1-brightgreen)
+![Version](https://img.shields.io/badge/Version-0.1.1%20beta-blue)
 
 A Visual Studio Code extension that displays currently playing music information and provides playback controls directly in your editor. Perfect for Linux developers who want to stay in their coding flow while managing their music.
 
