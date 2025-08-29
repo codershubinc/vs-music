@@ -400,7 +400,7 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
                 console.log('No current track, showing no music message');
                 content.innerHTML = \`
                     <div class="no-music"> 
-                        <div>No music currently playingggg</div>
+                        <div>No music currently playing <br> or wait for a while ......</div>
                     </div>
                 \`;
                 return;
