@@ -5,6 +5,36 @@ All notable changes to the VS Music extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2025-08-30
+
+### Added
+
+- **Album Artwork Display**: Full album artwork support in the music explorer panel
+- **Artwork Caching System**: Intelligent caching of album artwork for better performance
+- **Side-by-side Layout**: Clean flexbox layout with artwork and track details displayed together
+- **Enhanced UI Components**: Improved visual design of the music explorer panel
+- **File URI Handling**: Proper handling of local file artwork from GSConnect and other sources
+
+### Enhanced
+
+- **Music Explorer Panel**: Redesigned with better visual hierarchy and artwork integration
+- **Webview Communication**: Improved message passing between extension and webview
+- **Error Handling**: Better fallback mechanisms when artwork is unavailable
+- **Performance**: Optimized artwork loading and caching for smoother experience
+
+### Fixed
+
+- **Artwork Loading**: Fixed issues with file:// URLs not displaying in webviews
+- **UI Updates**: Resolved JavaScript errors preventing UI updates in the music panel
+- **Layout Issues**: Corrected duplicate container elements causing layout problems
+- **Variable Naming**: Fixed inconsistent variable references in webview templates
+
+### Technical Improvements
+
+- **Code Organization**: Cleaned up duplicate code and improved maintainability
+- **Type Safety**: Enhanced TypeScript type definitions for better development experience
+- **Build Process**: Optimized webpack configuration for better bundle size
+
 ## [0.0.1] - 2025-08-24
 
 ### Added

@@ -1,10 +1,10 @@
 # VS Music Extension for VS Code
 
-![VS Music Icon](https://img.shields.io/badge/VS%20Code-Music%20Extension-blue?logo=visual-studio-code)
-![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux)
+![VS Music Icon](https://img.shields.io/badge/VS%20Code-Music%20Extension-blue?logo=visual-studio-code.svg)
+![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux.svg)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Publisher](https://img.shields.io/badge/Publisher-codershubinc-orange)
-![Version](https://img.shields.io/badge/Version-0.1.1%20beta-blue)
+![Publisher](https://img.shields.io/badge/Publisher-codershubinc-orange.svg)
+![Version](https://img.shields.io/badge/Version-0.1.2-blue.svg)
 
 A Visual Studio Code extension that displays currently playing music information and provides playback controls directly in your editor. Perfect for Linux developers who want to stay in their coding flow while managing their music.
 
@@ -21,6 +21,8 @@ _The extension showing current track information in VS Code with the music playe
 - **Music Explorer Panel**: Dedicated panel in the Explorer sidebar with music controls
 - **Playback Controls**: Play/pause, next/previous track controls
 - **Real-time Updates**: Automatically updates when tracks change
+- **Album Artwork Display**: Shows album artwork in the music panel when available
+- **Side-by-side Layout**: Clean layout with artwork and track info displayed together
 - **Corner Widget**: Optional floating widget for quick access
 - **Configurable Display**: Customize what information is shown and where
 
@@ -116,7 +118,7 @@ playerctl status
 
 2. **From VSIX file**:
 
-   - Download the `music-0.0.1.vsix` file from [releases](https://github.com/codershubinc/vscode-music/releases)
+   - Download the `music-0.1.2.vsix` file from [releases](https://github.com/codershubinc/vscode-music/releases)
    - Open VS Code
    - Press Ctrl+Shift+P and type "Extensions: Install from VSIX"
    - Select the downloaded .vsix file
@@ -154,9 +156,10 @@ Access these commands via the Command Palette (Ctrl+Shift+P):
 #### Music Explorer Panel
 
 - Located in the Explorer sidebar
-- Shows detailed track information
+- Shows detailed track information with album artwork
 - Includes playback controls
-- Shows album art (when available)
+- Features a clean side-by-side layout with artwork and track details
+- Automatically caches artwork for better performance
 
 #### Corner Widget
 
@@ -175,20 +178,22 @@ Configure the extension through VS Code settings (File → Preferences → Setti
   "music.statusBarPriority": 100,
   "music.updateInterval": 1000,
   "music.showAlbumArt": true,
+  "music.enableArtworkCaching": true,
   "music.maxTitleLength": 30
 }
 ```
 
 ### Settings Reference
 
-| Setting                   | Type    | Default   | Description                                    |
-| ------------------------- | ------- | --------- | ---------------------------------------------- |
-| `music.enableStatusBar`   | boolean | `true`    | Show music info in status bar                  |
-| `music.statusBarPosition` | string  | `"right"` | Position of music info (`"left"` or `"right"`) |
-| `music.statusBarPriority` | number  | `100`     | Priority of music status bar item              |
-| `music.updateInterval`    | number  | `1000`    | Update interval in milliseconds                |
-| `music.showAlbumArt`      | boolean | `true`    | Show album art in music panel                  |
-| `music.maxTitleLength`    | number  | `30`      | Maximum length of song title in status bar     |
+| Setting                      | Type    | Default   | Description                                    |
+| ---------------------------- | ------- | --------- | ---------------------------------------------- |
+| `music.enableStatusBar`      | boolean | `true`    | Show music info in status bar                  |
+| `music.statusBarPosition`    | string  | `"right"` | Position of music info (`"left"` or `"right"`) |
+| `music.statusBarPriority`    | number  | `100`     | Priority of music status bar item              |
+| `music.updateInterval`       | number  | `1000`    | Update interval in milliseconds                |
+| `music.showAlbumArt`         | boolean | `true`    | Show album art in music panel                  |
+| `music.enableArtworkCaching` | boolean | `true`    | Cache album artwork for better performance     |
+| `music.maxTitleLength`       | number  | `30`      | Maximum length of song title in status bar     |
 
 ## 🔧 Troubleshooting
 
@@ -287,7 +292,7 @@ bun run build-vsix
 
 - **Extension Name**: VS Music
 - **Publisher**: codershubinc
-- **Version**: 0.0.1
+- **Version**: 0.1.2
 - **Category**: Other
 - **License**: MIT
 - **Engine**: VS Code ^1.103.0
