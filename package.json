@@ -25,7 +25,22 @@
     "playback",
     "music-info",
     "vlc",
-    "rhythmbox"
+    "rhythmbox",
+    "media-player",
+    "music-control",
+    "now-playing",
+    "track-info",
+    "album-art",
+    "widget",
+    "explorer",
+    "panel",
+    "desktop",
+    "multimedia",
+    "productivity",
+    "developer-tools",
+    "entertainment",
+    "audio-control",
+    "music-widget"
   ],
   "main": "./dist/extension.js",
   "devDependencies": {
@@ -45,7 +60,8 @@
   },
   "activationEvents": [],
   "categories": [
-    "Other"
+    "Other",
+    "Visualization"
   ],
   "contributes": {
     "commands": [
@@ -146,8 +162,8 @@
       }
     }
   },
-  "description": "Display currently playing music info and controls in VS Code",
-  "displayName": "VS Music",
+  "description": "Music player widget with status bar, controls & now playing info for Spotify, VLC, and other media players via MPRIS",
+  "displayName": "Music Player Widget",
   "icon": "ico.png",
   "engines": {
     "vscode": "^1.103.0"
@@ -164,5 +180,6 @@
     "test": "vscode-test",
     "vsce:package": "vsce package",
     "build-vsix": "bun run package && bun run vsce:package"
-  }
+  },
+  "dependencies": {}
 }

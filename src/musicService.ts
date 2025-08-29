@@ -1,8 +1,13 @@
 import * as vscode from 'vscode';
 import { spawn, ChildProcess } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as https from 'https';
+import * as http from 'http';
 
 export interface TrackInfo {
     title: string;
+    artUrl: string;
     artist: string;
     album: string;
     duration?: number;
@@ -16,8 +21,11 @@ export class MusicService {
     private onTrackChangedCallback?: (track: TrackInfo | null) => void;
     private onPositionChangedCallback?: (position: number) => void;
     private isPlayerctlAvailable = false;
+    private extensionContext: vscode.ExtensionContext;
+    private artworkCache = new Map<string, string>();
 
-    constructor() {
+    constructor(context: vscode.ExtensionContext) {
+        this.extensionContext = context;
         this.initialize();
     }
 
@@ -30,8 +38,6 @@ export class MusicService {
     private async checkPlayerctlAvailability(): Promise<void> {
         return new Promise((resolve) => {
             const playerctl = spawn('playerctl', ['--version']);
-            console.log('Checking playerctl availability... ', playerctl);
-
 
             playerctl.on('exit', (code) => {
                 this.isPlayerctlAvailable = code === 0;
@@ -61,15 +67,15 @@ export class MusicService {
 
     private updateTrackInfo() {
         if (!this.isPlayerctlAvailable) {
-            // Fallback to showing a default message
             this.setCurrentTrack(null);
             return;
         }
 
+
         const playerctl = spawn('playerctl', [
             'metadata',
             '--format',
-            '{{title}}|{{artist}}|{{album}}|{{duration(position)}}|{{duration(mpris:length)}}|{{status}}'
+            '{{title}}|{{mpris:artUrl }}|{{artist}}|{{album}}|{{duration(position)}}|{{duration(mpris:length)}}|{{status}}'
         ]);
 
         let output = '';
@@ -77,19 +83,51 @@ export class MusicService {
             output += data.toString();
         });
 
+        playerctl.stderr.on('data', (data) => {
+            console.error('playerctl stderr:', data.toString());
+        });
+
         playerctl.on('exit', (code) => {
             if (code === 0 && output.trim()) {
                 const parts = output.trim().split('|');
+                // console.log('Parsed parts:', parts);
+                // outputChannel.appendLine('Parsed parts: ' + JSON.stringify(parts));
+
                 if (parts.length >= 6) {
                     const trackInfo: TrackInfo = {
                         title: parts[0] || 'Unknown Title',
-                        artist: parts[1] || 'Unknown Artist',
+                        artUrl: parts[1] || 'Unknown artwork',
+                        artist: parts[3] || 'Unknown Artist',
                         album: parts[2] || 'Unknown Album',
-                        position: this.parseDuration(parts[3]),
-                        duration: this.parseDuration(parts[4]),
-                        status: this.mapPlaybackStatus(parts[5])
+                        position: this.parseDuration(parts[4]),
+                        duration: this.parseDuration(parts[5]),
+                        status: this.mapPlaybackStatus(parts[6])
                     };
-                    this.setCurrentTrack(trackInfo);
+
+                    // Download and cache artwork if available
+                    if (trackInfo.artUrl && trackInfo.artUrl !== 'Unknown artwork') {
+                        console.log("Downloading artwork from:", trackInfo.artUrl);
+
+                        this.downloadArtwork(trackInfo.artUrl).then(localPath => {
+                            if (localPath) {
+                                trackInfo.artUrl = localPath;
+                            }
+                            console.log('Fetched track info:', trackInfo);
+                            this.setCurrentTrack(trackInfo);
+                        }).catch(() => {
+                            // If artwork download fails, still set the track
+                            console.log("Artwork download failed for:", trackInfo.artUrl);
+
+                            trackInfo.artUrl = '';
+                            console.log('Fetched track info:', trackInfo);
+                            this.setCurrentTrack(trackInfo);
+                        });
+                    } else {
+                        console.log("No artwork URL found for:", trackInfo.title);
+                        trackInfo.artUrl = '';
+                        console.log('Fetched track info:', trackInfo);
+                        this.setCurrentTrack(trackInfo);
+                    }
                 } else {
                     this.setCurrentTrack(null);
                 }
@@ -98,7 +136,8 @@ export class MusicService {
             }
         });
 
-        playerctl.on('error', () => {
+        playerctl.on('error', (error) => {
+            console.error('playerctl command error:', error);
             this.setCurrentTrack(null);
         });
     }
@@ -127,6 +166,8 @@ export class MusicService {
     }
 
     private setCurrentTrack(track: TrackInfo | null) {
+        console.log("Setting current track:", track);
+
         const wasPlayingBefore = this.currentTrack?.status === 'playing';
         const isPlayingNow = track?.status === 'playing';
         const trackChanged = !this.currentTrack ||
@@ -212,6 +253,96 @@ export class MusicService {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
             this.updateInterval = null;
+        }
+    }
+
+    private async downloadArtwork(artUrl: string): Promise<string | null> {
+        try {
+            // Check cache first
+            if (this.artworkCache.has(artUrl)) {
+                return this.artworkCache.get(artUrl)!;
+            }
+
+            // Handle file:// URLs by copying to extension storage
+            if (artUrl.startsWith('file://')) {
+                const sourcePath = artUrl.replace('file://', '');
+
+                // Check if source file exists
+                if (!fs.existsSync(sourcePath)) {
+                    return null;
+                }
+
+                // Create artwork directory in extension's global storage
+                const artworkDir = path.join(this.extensionContext.globalStorageUri.fsPath, 'artwork');
+                if (!fs.existsSync(artworkDir)) {
+                    fs.mkdirSync(artworkDir, { recursive: true });
+                }
+
+                // Generate filename from source path hash
+                const pathHash = Buffer.from(sourcePath).toString('base64').replace(/[/+=]/g, '_');
+                const extension = path.extname(sourcePath) || '.jpg';
+                const filename = `artwork_${pathHash}${extension}`;
+                const localPath = path.join(artworkDir, filename);
+
+                // Copy file if not already copied
+                if (!fs.existsSync(localPath)) {
+                    fs.copyFileSync(sourcePath, localPath);
+                }
+
+                const vscodeUri = vscode.Uri.file(localPath).toString();
+                this.artworkCache.set(artUrl, vscodeUri);
+                return vscodeUri;
+            }
+
+            // Skip if not http/https URL
+            if (!artUrl.startsWith('http://') && !artUrl.startsWith('https://')) {
+                return null;
+            }
+
+            // Create artwork directory in extension's global storage
+            const artworkDir = path.join(this.extensionContext.globalStorageUri.fsPath, 'artwork');
+            if (!fs.existsSync(artworkDir)) {
+                fs.mkdirSync(artworkDir, { recursive: true });
+            }
+
+            // Generate filename from URL hash
+            const urlHash = Buffer.from(artUrl).toString('base64').replace(/[/+=]/g, '_');
+            const filename = `artwork_${urlHash}.jpg`;
+            const localPath = path.join(artworkDir, filename);
+
+            // Check if already downloaded
+            if (fs.existsSync(localPath)) {
+                const vscodeUri = vscode.Uri.file(localPath).toString();
+                this.artworkCache.set(artUrl, vscodeUri);
+                return vscodeUri;
+            }
+
+            // Download the artwork
+            return new Promise((resolve) => {
+                const protocol = artUrl.startsWith('https://') ? https : http;
+
+                protocol.get(artUrl, (response) => {
+                    if (response.statusCode === 200) {
+                        const fileStream = fs.createWriteStream(localPath);
+                        response.pipe(fileStream);
+
+                        fileStream.on('finish', () => {
+                            fileStream.close();
+                            const vscodeUri = vscode.Uri.file(localPath).toString();
+                            this.artworkCache.set(artUrl, vscodeUri);
+                            resolve(vscodeUri);
+                        });
+                    } else {
+                        resolve(null);
+                    }
+                }).on('error', () => {
+                    resolve(null);
+                });
+            });
+
+        } catch (error) {
+            console.error('Error downloading artwork:', error);
+            return null;
         }
     }
 }

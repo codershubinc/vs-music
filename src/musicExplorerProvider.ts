@@ -19,25 +19,38 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [this.extensionUri]
+            localResourceRoots: [
+                this.extensionUri,
+                vscode.Uri.file('/home') // Allow access to cached artwork files
+            ]
         };
 
         webviewView.webview.html = this.getHtmlForWebview();
         this.setupWebviewMessageHandling();
 
-        // Update with current track if available
-        if (this.currentTrack) {
-            this.updateTrack(this.currentTrack);
-        }
+        // Current track will be sent when webview signals it's ready
     }
 
     public updateTrack(track: TrackInfo | null) {
+        console.log('ExplorerProvider updateTrack called with:', track);
         this.currentTrack = track;
         if (this._view) {
+            let artworkUri = '';
+            if (track?.artUrl) {
+                // Convert the artwork file path to webview URI
+                const artworkFileUri = vscode.Uri.parse(track.artUrl);
+                artworkUri = this._view.webview.asWebviewUri(artworkFileUri).toString();
+                console.log('Converted artwork URI:', artworkUri);
+            }
+
             this._view.webview.postMessage({
                 command: 'updateTrack',
-                track: track
+                track: track,
+                artworkUri: artworkUri
             });
+            console.log('Posted message to webview');
+        } else {
+            console.log('No webview available to update');
         }
     }
 
@@ -57,6 +70,12 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
 
         this._view.webview.onDidReceiveMessage(message => {
             switch (message.command) {
+                case 'webviewReady':
+                    console.log('Webview ready signal received, updating with current track');
+                    if (this.currentTrack) {
+                        this.updateTrack(this.currentTrack);
+                    }
+                    break;
                 case 'playPause':
                 case 'nextTrack':
                 case 'previousTrack':
@@ -104,7 +123,43 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
         
         .track-info {
             margin-bottom: 16px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .artwork-container {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .artwork {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            border: 2px solid #333333;
+        }
+        
+        .artwork-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: #333333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666666;
+            border: 2px solid #444444;
+        }
+        
+        .track-details {
+            flex: 1;
+            text-align: left;
+            min-width: 0; /* Allows text to truncate */
         }
         
         .track-title {
@@ -266,14 +321,20 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
     <script>
         const vscode = acquireVsCodeApi();
         let currentTrack = null;
+        let currentArtworkUri = '';
         let progressUpdateInterval = null;
 
         window.addEventListener('message', event => {
             const message = event.data;
+            console.log('Webview received message:', message);
             
             switch (message.command) {
                 case 'updateTrack':
+                    console.log('Processing updateTrack message');
                     currentTrack = message.track;
+                    currentArtworkUri = message.artworkUri || '';
+                    console.log('Set currentTrack to:', currentTrack);
+                    console.log('Set currentArtworkUri to:', currentArtworkUri);
                     updateUI();
                     setupProgressUpdates();
                     break;
@@ -331,17 +392,21 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
         }
 
         function updateUI() {
+            console.log('updateUI called with currentTrack:', currentTrack);
             const content = document.getElementById('musicContent');
+            console.log('Found content element:', content);
             
             if (!currentTrack) {
+                console.log('No current track, showing no music message');
                 content.innerHTML = \`
                     <div class="no-music"> 
-                        <div>No music currently playing</div>
+                        <div>No music currently playingggg</div>
                     </div>
                 \`;
                 return;
             }
 
+            console.log('Updating UI with track info');
             const progressPercent = currentTrack.duration && currentTrack.position 
                 ? (currentTrack.position / currentTrack.duration) * 100 
                 : 0;
@@ -350,13 +415,32 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
                               currentTrack.status === 'paused' ? '⏸' : '⏹';
 
             content.innerHTML = \`
+                \${currentArtworkUri ? \`
+                <div class="artwork-container"> 
+                    <div class="artwork-placeholder" style="display: none;">🎵</div>
+                </div>
+                \` : \`
+                <div class="artwork-container">
+                    <div class="artwork-placeholder">🎵</div>
+                </div>
+                \`}
+                
                 <div class="track-info"> 
-                    <div class="status-indicator status-\${currentTrack.status}">
-                        \${statusIcon}
+                    <div class="artwork-container">
+                        \${currentArtworkUri ? 
+                            \`<img class="artwork" src="\${currentArtworkUri}" alt="Album artwork" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                             <div class="artwork-placeholder" style="display: none;">🎵</div>\` :
+                            \`<div class="artwork-placeholder">🎵</div>\`
+                        }
                     </div>
-                    <div class="track-title">\${currentTrack.title}</div>
-                    <div class="track-artist">\${currentTrack.artist}</div>
-                    \${currentTrack.album ? \`<div class="track-album">\${currentTrack.album}</div>\` : ''}
+                    <div class="track-details">
+                        <div class="status-indicator status-\${currentTrack.status}">
+                            \${statusIcon}
+                        </div>
+                        <div class="track-title">\${currentTrack.title}</div>
+                        <div class="track-artist">\${currentTrack.artist}</div>
+                        \${currentTrack.album ? \`<div class="track-album">\${currentTrack.album}</div>\` : ''}
+                    </div>
                 </div>
                 
                 \${currentTrack.duration ? \`
@@ -391,6 +475,10 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
         function sendCommand(command) {
             vscode.postMessage({ command: command });
         }
+
+        // Signal that webview is ready
+        console.log('Webview is ready, sending ready message');
+        vscode.postMessage({ command: 'webviewReady' });
     </script>
 </body>
 </html>`;

@@ -61,6 +61,8 @@ export class MusicPanel {
         this.currentTrack = track;
 
         if (this.panel) {
+            console.log("log for updating track info from musicPannel.ts");
+
             this.panel.webview.postMessage({
                 command: 'updateTrack',
                 track: track

@@ -12,14 +12,20 @@ export class MusicController {
     private disposables: vscode.Disposable[] = [];
 
     constructor(context: vscode.ExtensionContext) {
-        this.musicService = new MusicService();
+        console.log('MusicController constructor called');
+        this.musicService = new MusicService(context);
+        console.log('MusicService created');
         this.statusBarWidget = new MusicStatusBarWidget();
+        console.log('StatusBarWidget created');
         this.cornerWidget = new MusicCornerWidget(context.extensionUri);
+        console.log('CornerWidget created');
         this.explorerProvider = new MusicExplorerProvider(context.extensionUri);
+        console.log('ExplorerProvider created');
 
         this.setupWebviewView(context);
         this.setupEventHandlers();
         this.registerCommands(context);
+        console.log('MusicController initialization completed');
     }
 
     private setupWebviewView(context: vscode.ExtensionContext) {
@@ -128,6 +134,8 @@ export class MusicController {
     }
 
     public getCurrentTrack() {
+        console.log("Getting current track info......");
+
         return this.musicService.getCurrentTrack();
     }
 

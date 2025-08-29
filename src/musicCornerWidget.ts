@@ -26,9 +26,17 @@ export class MusicCornerWidget {
     public updateTrack(track: TrackInfo | null) {
         this.currentTrack = track;
         if (this.webviewPanel) {
+            let artworkUri = '';
+            if (track?.artUrl) {
+                // Convert the artwork file path to webview URI
+                const artworkFileUri = vscode.Uri.parse(track.artUrl);
+                artworkUri = this.webviewPanel.webview.asWebviewUri(artworkFileUri).toString();
+            }
+
             this.webviewPanel.webview.postMessage({
                 command: 'updateTrack',
-                track: track
+                track: track,
+                artworkUri: artworkUri
             });
         }
     }
@@ -244,7 +252,41 @@ export class MusicCornerWidget {
         
         .track-info {
             margin-bottom: 16px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .artwork-container {
+            flex-shrink: 0;
+        }
+        
+        .artwork {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            border: 1px solid #333333;
+        }
+        
+        .artwork-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            background: #333333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #666666;
+            border: 1px solid #444444;
+        }
+        
+        .track-details {
+            flex: 1;
+            min-width: 0;
+            text-align: left;
         }
         
         .track-title {
@@ -490,7 +532,7 @@ export class MusicCornerWidget {
             if (!currentTrack) {
                 content.innerHTML = \`
                     <div class="no-music">
-                        <div class="no-music-icon">🎵</div>
+                        <div class="no-music-icon">🎵iuo</div>
                         <div>No music currently playing</div>
                     </div>
                 \`;
@@ -506,13 +548,21 @@ export class MusicCornerWidget {
 
             content.innerHTML = \`
                 <div class="track-info">
-                    <div class="music-icon">🎵</div>
-                    <div class="status-indicator status-\${currentTrack.status}">
-                        \${statusIcon}
+                    <div class="artwork-container">
+                        \${artworkUri ? 
+                            \`<img class="artwork" src="\${artworkUri}" alt="Album artwork" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                             <div class="artwork-placeholder" style="display: none;">🎵</div>\` :
+                            \`<div class="artwork-placeholder">🎵</div>\`
+                        }
                     </div>
-                    <div class="track-title">\${currentTrack.title}</div>
-                    <div class="track-artist">\${currentTrack.artist}</div>
-                    \${currentTrack.album ? \`<div class="track-album">\${currentTrack.album}</div>\` : ''}
+                    <div class="track-details">
+                        <div class="status-indicator status-\${currentTrack.status}">
+                            \${statusIcon}
+                        </div>
+                        <div class="track-title">\${currentTrack.title}</div>
+                        <div class="track-artist">\${currentTrack.artist}</div>
+                        \${currentTrack.album ? \`<div class="track-album">\${currentTrack.album}</div>\` : ''}
+                    </div>
                 </div>
                 
                 \${currentTrack.duration ? \`
