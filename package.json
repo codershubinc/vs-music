@@ -163,7 +163,7 @@
     }
   },
   "description": "Music player widget with status bar, controls & now playing info for Spotify, VLC, and other media players via MPRIS",
-  "displayName": "Music Player Widget",
+  "displayName": "VS Music",
   "icon": "ico.png",
   "engines": {
     "vscode": "^1.103.0"
