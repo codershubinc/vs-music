@@ -160,6 +160,7 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
             flex: 1;
             text-align: left;
             min-width: 0; /* Allows text to truncate */
+            overflow: hidden; /* Ensure container clips overflow */
         }
         
         .track-title {
@@ -168,7 +169,10 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
             margin-bottom: 8px;
             color: #ffffff;
             line-height: 1.3;
-            word-wrap: break-word;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: scroll-text 15s linear infinite;
+            padding-right: 20px; /* Add some space for better flow */
         }
         
         .track-artist {
@@ -176,6 +180,23 @@ export class MusicExplorerProvider implements vscode.WebviewViewProvider {
             color: #bbbbbb;
             margin-bottom: 4px;
             font-weight: 500;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: scroll-text 12s linear infinite;
+            padding-right: 20px; /* Add some space for better flow */
+        }
+        
+        @keyframes scroll-text {
+            0% { transform: translateX(0%); }
+            20% { transform: translateX(0%); }
+            80% { transform: translateX(calc(-100% + 200px)); }
+            100% { transform: translateX(calc(-100% + 200px)); }
+        }
+        
+        /* Pause animation on hover for better readability */
+        .track-title:hover,
+        .track-artist:hover {
+            animation-play-state: paused;
         }
         
         .track-album {
