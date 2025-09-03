@@ -5,6 +5,44 @@ All notable changes to the VS Music extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2025-09-01
+
+### Added
+
+- **Scrolling Text Animation**: Long track titles and artist names now flow horizontally with smooth scrolling animation
+- **Interactive Text Control**: Hover over track info to pause scrolling animation for better readability
+- **Enhanced Typography**: Improved text overflow handling with elegant scrolling for long content
+
+### Enhanced
+
+- **Text Display**: Better handling of long track titles that exceed the available width
+- **User Experience**: Smooth 15-second animation cycle for titles, 12-second for artist names
+- **Visual Polish**: Added padding and improved text flow for professional appearance
+
+### Fixed
+
+- **Text Truncation**: Resolved issues with long song titles being cut off or unreadable
+- **Layout Consistency**: Improved text container overflow handling
+
+## [0.1.3] - 2025-08-31
+
+### Enhanced
+
+- **Extension Branding**: Updated display name to "VS Music Widget" for better marketplace visibility
+- **Code Organization**: Cleaned up duplicate artwork containers and HTML structure
+- **UI Structure**: Simplified conditional rendering logic in webview templates
+
+### Fixed
+
+- **HTML Layout Issues**: Removed duplicate container elements causing layout conflicts
+- **Code Quality**: Cleaned up redundant code and improved maintainability
+- **Extension Metadata**: Corrected extension display name and version references
+
+### Technical Improvements
+
+- **Build Process**: Optimized extension packaging and deployment workflow
+- **Documentation**: Updated README with correct version information and feature descriptions
+
 ## [0.1.2] - 2025-08-30
 
 ### Added
@@ -54,12 +92,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Configure maximum title length
   - Toggle album art display
 - **Supported Music Players**:
-  - Spotify (official client)
+  - Spotify
   - VLC Media Player
   - Rhythmbox, Audacious, Clementine
   - Strawberry, Amarok, Banshee
   - Totem, mpv (with MPRIS script)
   - Browser-based players (Chrome/Firefox)
+  - Almost all type of media players
 - **Commands Available**:
   - `Music: Toggle Widget`
   - `Music: Toggle Corner Widget`
