@@ -7,8 +7,43 @@ import { LinuxMusicService } from './musicService';
 import { ArtworkUtil } from './utils/artworkUtil';
 
 /**
- * Linux Music Controller - Central controller for all Linux music operations
- * Exports all music controlling commands and metadata handling
+ * ========================================================================
+ * LINUX MUSIC CONTROLLER - Platform-Specific Music Integration
+ * ========================================================================
+ * 
+ * This is the CENTRAL CONTROLLER for all Linux music operations.
+ * It acts as a unified interface between the common webview and Linux-specific
+ * music system integration via MPRIS (Media Player Remote Interfacing Specification).
+ * 
+ * ARCHITECTURE ROLE:
+ * ------------------
+ * Layer 1: VS Code Host
+ * Layer 2: Common Extension Logic (extension.ts)
+ * Layer 3: >>> THIS FILE <<< - Linux-specific backend
+ * Layer 4: Common UI (musicWebviewProvider.ts)
+ * 
+ * LINUX MUSIC INTEGRATION:
+ * ------------------------
+ * Linux uses MPRIS (D-Bus protocol) to communicate with media players:
+ * - Spotify, VLC, Rhythmbox, Audacious, etc. all support MPRIS
+ * - We use 'playerctl' command-line tool to interact with MPRIS
+ * - Provides standardized interface for play/pause/next/prev/metadata
+ * 
+ * CONTROLLER RESPONSIBILITIES:
+ * ----------------------------
+ * 1. 🎵 Music Control: Play, pause, next, previous track commands
+ * 2. 📊 Metadata Access: Track title, artist, album, duration, position
+ * 3. 🖼️ Artwork Processing: Download, cache, and serve album artwork
+ * 4. 🔄 State Management: Track playback state and position updates
+ * 5. 🛡️ Error Handling: Graceful degradation when music players unavailable
+ * 
+ * WHY A CONTROLLER PATTERN:
+ * -------------------------
+ * - Encapsulates all Linux-specific logic in one place
+ * - Provides consistent API that common webview can rely on
+ * - Easy to swap out or extend without affecting UI layer
+ * - Clear separation of concerns (UI logic vs platform logic)
+ * - Future Windows/macOS controllers can implement same interface
  */
 export class LinuxMusicController {
     private musicService: LinuxMusicService;

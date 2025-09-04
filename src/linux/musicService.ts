@@ -134,7 +134,7 @@ export class LinuxMusicService {
                             album: parts[3] || 'Unknown Album',
                             position: this.parseDuration(parts[4]),
                             duration: this.parseDuration(parts[5]),
-                            status: (parts[6] as any) || 'stopped',
+                            status: (parts[6]?.toLowerCase() as any) || 'stopped',
                             player: parts[7] || 'Unknown Player'
                         };
                         resolve(track);
