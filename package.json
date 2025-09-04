@@ -43,6 +43,12 @@
     "music-widget"
   ],
   "main": "./dist/extension.js",
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.html",
+    "ico.png",
+    "icon.svg"
+  ],
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
@@ -52,6 +58,7 @@
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.0",
+    "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9.32.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.9.2",

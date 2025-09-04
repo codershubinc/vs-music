@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import * as os from 'os';
 import { LinuxMusicService } from './linux/musicService';
-import { LinuxMusicWebviewProvider } from './linux/ui/musicWebviewProvider';
+import { LinuxMusicWebviewProviderCompact } from './linux/ui/musicWebviewProviderCompact';
 import { WindowsMusicWebviewProvider } from './windows/ui/musicWebviewProvider';
+import FIND_FILE_PATHS from './utils/findFilePaths';
 
 let musicService: LinuxMusicService | undefined;
-let webviewProvider: LinuxMusicWebviewProvider | WindowsMusicWebviewProvider | undefined;
+let webviewProvider: LinuxMusicWebviewProviderCompact | WindowsMusicWebviewProvider | undefined;
 
 // This method is called when your extension is activated
 export async function activate(context: vscode.ExtensionContext) {
@@ -44,27 +45,27 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 async function initializeLinuxSupport(context: vscode.ExtensionContext): Promise<void> {
+	console.log("HTML file path is", FIND_FILE_PATHS.getPath(context, "src/linux/ui/webview/compactPlayer.html"));
+
 	try {
 		// Initialize Linux music service
 		musicService = new LinuxMusicService(context);
 		await musicService.initialize();
 
 		// Create and register Linux webview provider
-		webviewProvider = new LinuxMusicWebviewProvider(context, musicService);
+		webviewProvider = new LinuxMusicWebviewProviderCompact(context, musicService);
 
 		context.subscriptions.push(
 			vscode.window.registerWebviewViewProvider(
-				LinuxMusicWebviewProvider.viewType,
-				webviewProvider,
+				LinuxMusicWebviewProviderCompact.viewType,
+				webviewProvider as LinuxMusicWebviewProviderCompact,
 				{
 					webviewOptions: {
 						retainContextWhenHidden: true
 					}
 				}
 			)
-		);
-
-		// Register commands
+		);		// Register commands
 		registerLinuxCommands(context);
 
 		console.log('Linux music support initialized successfully');
@@ -120,7 +121,7 @@ function registerLinuxCommands(context: vscode.ExtensionContext): void {
 			// Force update webview after action
 			setTimeout(() => {
 				if (webviewProvider && 'forceUpdate' in webviewProvider) {
-					(webviewProvider as LinuxMusicWebviewProvider).forceUpdate();
+					(webviewProvider as LinuxMusicWebviewProviderCompact).forceUpdate();
 				}
 			}, 100);
 		} catch (error) {
@@ -134,7 +135,7 @@ function registerLinuxCommands(context: vscode.ExtensionContext): void {
 			await musicService?.next();
 			setTimeout(() => {
 				if (webviewProvider && 'forceUpdate' in webviewProvider) {
-					(webviewProvider as LinuxMusicWebviewProvider).forceUpdate();
+					(webviewProvider as LinuxMusicWebviewProviderCompact).forceUpdate();
 				}
 			}, 100);
 		} catch (error) {
@@ -148,7 +149,7 @@ function registerLinuxCommands(context: vscode.ExtensionContext): void {
 			await musicService?.previous();
 			setTimeout(() => {
 				if (webviewProvider && 'forceUpdate' in webviewProvider) {
-					(webviewProvider as LinuxMusicWebviewProvider).forceUpdate();
+					(webviewProvider as LinuxMusicWebviewProviderCompact).forceUpdate();
 				}
 			}, 100);
 		} catch (error) {
