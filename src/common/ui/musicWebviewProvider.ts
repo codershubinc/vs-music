@@ -1,23 +1,42 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { LinuxMusicService } from '../musicService';
-import { ArtworkUtil } from '../utils/artworkUtil';
+import * as os from 'os';
 
-export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvider {
+// Import platform-specific controllers
+import LinuxMusicController from '../../linux/index';
+// TODO: Import WindowsMusicController when implemented
+
+/**
+ * Common Music Webview Provider
+ * Uses platform-specific controllers for cross-platform compatibility
+ */
+export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'vsMusicPlayer';
 
     private _view?: vscode.WebviewView;
-    private _musicService: LinuxMusicService;
+    private _controller: LinuxMusicController; // Will be union type when Windows is added
     private _updateTimer?: NodeJS.Timeout;
     private _context: vscode.ExtensionContext;
 
-    constructor(context: vscode.ExtensionContext, musicService: LinuxMusicService) {
+    constructor(context: vscode.ExtensionContext) {
         this._context = context;
-        this._musicService = musicService;
 
-        // Initialize artwork utility
-        ArtworkUtil.initialize(context);
+        // Initialize platform-specific controller
+        const platform = os.platform();
+        switch (platform) {
+            case 'linux':
+                this._controller = new LinuxMusicController(context);
+                break;
+            // case 'win32':
+            //     this._controller = new WindowsMusicController(context);
+            //     break;
+            default:
+                // Fallback to Linux controller for now
+                this._controller = new LinuxMusicController(context);
+                console.warn(`Platform ${platform} not fully supported, using Linux controller`);
+                break;
+        }
     }
 
     public resolveWebviewView(
@@ -35,7 +54,7 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
             ]
         };
 
-        webviewView.webview.html = this._getCompactHtml();
+        webviewView.webview.html = this._getHtml();
 
         webviewView.webview.onDidReceiveMessage(
             (message) => {
@@ -69,17 +88,17 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
                     break;
 
                 case 'playPause':
-                    await this._musicService.playPause();
+                    await this._controller.playPause();
                     setTimeout(() => this.updateWebview(), 100);
                     break;
 
                 case 'next':
-                    await this._musicService.next();
+                    await this._controller.next();
                     setTimeout(() => this.updateWebview(), 100);
                     break;
 
                 case 'previous':
-                    await this._musicService.previous();
+                    await this._controller.previous();
                     setTimeout(() => this.updateWebview(), 100);
                     break;
 
@@ -115,8 +134,8 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
         }
 
         try {
-            const trackInfo = await this._musicService.getCurrentTrack();
-            const currentPosition = await this._musicService.getPosition();
+            const trackInfo = await this._controller.getCurrentTrack();
+            const currentPosition = await this._controller.getPosition();
 
             if (!trackInfo || !trackInfo.title) {
                 this._view.webview.postMessage({
@@ -126,20 +145,11 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
                 return;
             }
 
-            let artworkUri = '';
-            if (trackInfo.artUrl) {
-                try {
-                    // Use the artwork utility to download and cache artwork
-                    const cachedArtworkUri = await ArtworkUtil.downloadArtwork(trackInfo.artUrl);
-                    if (cachedArtworkUri) {
-                        const artworkFileUri = vscode.Uri.parse(cachedArtworkUri);
-                        artworkUri = this._view.webview.asWebviewUri(artworkFileUri).toString();
-                        console.log('Converted cached artwork URI:', artworkUri);
-                    }
-                } catch (error) {
-                    console.warn('Error processing artwork:', error);
-                }
-            }
+            // Use controller's artwork processing
+            const artworkUri = await this._controller.getArtworkUri(
+                trackInfo.artUrl || '',
+                this._view.webview
+            );
 
             this._view.webview.postMessage({
                 command: 'updateTrack',
@@ -157,18 +167,18 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
         }
     }
 
-    private _getCompactHtml(): string {
+    private _getHtml(): string {
         try {
             // Try to read from the dist directory first (packaged extension)
-            let htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'linux', 'ui', 'webview', 'compactPlayer.html');
-            let cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'linux', 'ui', 'webview', 'musicPlayer.css');
-            let jsPath = path.join(this._context.extensionPath, 'dist', 'src', 'linux', 'ui', 'webview', 'musicPlayer.js');
+            let htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'compactPlayer.html');
+            let cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'musicPlayer.css');
+            let jsPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'musicPlayer.js');
 
             if (!fs.existsSync(htmlPath)) {
                 // Fallback to src directory (development)
-                htmlPath = path.join(this._context.extensionPath, 'src', 'linux', 'ui', 'webview', 'compactPlayer.html');
-                cssPath = path.join(this._context.extensionPath, 'src', 'linux', 'ui', 'webview', 'musicPlayer.css');
-                jsPath = path.join(this._context.extensionPath, 'src', 'linux', 'ui', 'webview', 'musicPlayer.js');
+                htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'compactPlayer.html');
+                cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.css');
+                jsPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.js');
             }
 
             console.log('Trying to read HTML from:', htmlPath);
@@ -184,13 +194,9 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
 
             return htmlContent;
         } catch (error) {
-            console.error('Error reading compact HTML file:', error);
-            return this._getFallbackHtml();
+            console.error('Error reading HTML file:', error);
+            return `<html><body><div style='color:red;padding:1em;'>Error loading music player UI.</div></body></html>`;
         }
-    }
-
-    private _getFallbackHtml(): string {
-        return `<html><body><div style='color:red;padding:1em;'>Error loading music player UI.</div></body></html>`;
     }
 
     public async forceUpdate(): Promise<void> {
@@ -205,5 +211,6 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
 
     public dispose(): void {
         this.stopPeriodicUpdates();
+        this._controller.dispose();
     }
 }

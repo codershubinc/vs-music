@@ -33,6 +33,8 @@ export class ArtworkUtil {
 
             // Handle file:// URLs by copying to extension storage
             if (artUrl.startsWith('file://')) {
+                console.log('Handling file URL for artwork:', artUrl);
+
                 return this.handleFileUrl(artUrl);
             }
 
@@ -73,6 +75,8 @@ export class ArtworkUtil {
         }
 
         const vscodeUri = vscode.Uri.file(localPath).toString();
+        console.log('Copied artwork from file URL:', vscodeUri);
+
         this.artworkCache.set(artUrl, vscodeUri);
         return vscodeUri;
     }
