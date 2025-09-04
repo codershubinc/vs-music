@@ -66,46 +66,31 @@
   "contributes": {
     "commands": [
       {
-        "command": "music.toggleWidget",
-        "title": "Music: Toggle Widget",
-        "icon": "$(music)"
-      },
-      {
-        "command": "music.toggleCornerWidget",
-        "title": "Music: Toggle Corner Widget",
-        "icon": "$(music)"
-      },
-      {
-        "command": "music.playPause",
+        "command": "vsMusic.playPause",
         "title": "Music: Play/Pause",
         "icon": "$(play)"
       },
       {
-        "command": "music.nextTrack",
+        "command": "vsMusic.nextTrack",
         "title": "Music: Next Track",
         "icon": "$(chevron-right)"
       },
       {
-        "command": "music.previousTrack",
+        "command": "vsMusic.previousTrack",
         "title": "Music: Previous Track",
         "icon": "$(chevron-left)"
       },
       {
-        "command": "music.showPanel",
+        "command": "vsMusic.showMusicPanel",
         "title": "Music: Show Music Panel",
         "icon": "$(music)"
-      },
-      {
-        "command": "music.refreshExplorer",
-        "title": "Refresh",
-        "icon": "$(refresh)"
       }
     ],
     "views": {
       "explorer": [
         {
           "type": "webview",
-          "id": "musicExplorer",
+          "id": "vsMusicPlayer",
           "name": "Music Player",
           "when": "true",
           "icon": "$(music)",
@@ -114,13 +99,7 @@
       ]
     },
     "menus": {
-      "view/title": [
-        {
-          "command": "music.refreshExplorer",
-          "when": "view == musicExplorer",
-          "group": "navigation"
-        }
-      ]
+      "view/title": []
     },
     "configuration": {
       "title": "VS Music",
