@@ -1,4 +1,8 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as https from 'https';
+import * as http from 'http';
 import { LinuxMusicService } from './musicService';
 import { ArtworkUtil } from './utils/artworkUtil';
 
@@ -9,6 +13,7 @@ import { ArtworkUtil } from './utils/artworkUtil';
 export class LinuxMusicController {
     private musicService: LinuxMusicService;
     private context: vscode.ExtensionContext;
+    private artworkCache = new Map<string, string>();
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -69,22 +74,110 @@ export class LinuxMusicController {
         }
 
         try {
-            // Process artwork through utility
-            const processedPath = await ArtworkUtil.downloadArtwork(artUrl);
-            console.log('Processed artwork path:', processedPath);
-
-            if (processedPath) {
-                const artworkFileUri = vscode.Uri.file(processedPath);
-                console.log('Processed artwork URI artworkFilePath :', artworkFileUri);
-                return processedPath;
+            const localPath = await this.downloadArtwork(artUrl);
+            if (localPath) {
+                const artworkFileUri = vscode.Uri.file(localPath);
+                return webview.asWebviewUri(artworkFileUri).toString();
             }
-
-            // Fallback: try to parse as direct URI
-            const artworkFileUri = vscode.Uri.parse(artUrl);
-            return webview.asWebviewUri(artworkFileUri).toString();
+            return '';
         } catch (error) {
             console.warn('Error processing artwork URI:', error);
             return '';
+        }
+    }
+
+    /**
+     * Download and cache artwork locally
+     */
+    private async downloadArtwork(artUrl: string): Promise<string | null> {
+        try {
+            // Check cache first
+            if (this.artworkCache.has(artUrl)) {
+                return this.artworkCache.get(artUrl)!;
+            }
+
+            // Handle file:// URLs by copying to extension storage
+            if (artUrl.startsWith('file://')) {
+                const sourcePath = artUrl.replace('file://', '');
+
+                // Check if source file exists
+                if (!fs.existsSync(sourcePath)) {
+                    return null;
+                }
+
+                // Create artwork directory in extension's global storage
+                const artworkDir = path.join(this.context.globalStorageUri.fsPath, 'artwork');
+                if (!fs.existsSync(artworkDir)) {
+                    fs.mkdirSync(artworkDir, { recursive: true });
+                }
+
+                // Generate filename from source path hash
+                const pathHash = Buffer.from(sourcePath).toString('base64').replace(/[/+=]/g, '_');
+                const extension = path.extname(sourcePath) || '.jpg';
+                const filename = `artwork_${pathHash}${extension}`;
+                const localPath = path.join(artworkDir, filename);
+
+                // Copy file if not already copied
+                if (!fs.existsSync(localPath)) {
+                    fs.copyFileSync(sourcePath, localPath);
+                }
+
+                this.artworkCache.set(artUrl, localPath);
+                console.log('Processed artwork path:', localPath);
+                return localPath;
+            }
+
+            // Skip if not http/https URL
+            if (!artUrl.startsWith('http://') && !artUrl.startsWith('https://')) {
+                return null;
+            }
+
+            // Create artwork directory in extension's global storage
+            const artworkDir = path.join(this.context.globalStorageUri.fsPath, 'artwork');
+            if (!fs.existsSync(artworkDir)) {
+                fs.mkdirSync(artworkDir, { recursive: true });
+            }
+
+            // Generate filename from URL hash
+            const urlHash = Buffer.from(artUrl).toString('base64').replace(/[/+=]/g, '_');
+            const filename = `artwork_${urlHash}.jpg`;
+            const localPath = path.join(artworkDir, filename);
+
+            // Check if already downloaded
+            if (fs.existsSync(localPath)) {
+                this.artworkCache.set(artUrl, localPath);
+                console.log('Processed artwork path (cached):', localPath);
+                return localPath;
+            }
+
+            // Download the artwork
+            return new Promise((resolve) => {
+                const protocol = artUrl.startsWith('https://') ? https : http;
+
+                protocol.get(artUrl, (response) => {
+                    if (response.statusCode === 200) {
+                        const fileStream = fs.createWriteStream(localPath);
+                        response.pipe(fileStream);
+
+                        fileStream.on('finish', () => {
+                            fileStream.close();
+                            this.artworkCache.set(artUrl, localPath);
+                            console.log('Downloaded artwork to:', localPath);
+                            resolve(localPath);
+                        });
+                    } else {
+                        console.warn('Failed to download artwork, status:', response.statusCode);
+                        resolve(null);
+                    }
+                }).on('error', (error) => {
+                    console.error('Error downloading artwork:', error);
+                    resolve(null);
+                });
+            });
+
+        } catch (error) {
+            console.error('Error downloading artwork:', error);
+            return null;
         }
     }
 

@@ -48,7 +48,9 @@
     "dist/**/*.html",
     "dist/**/*.css",
     "ico.png",
-    "icon.svg"
+    "icon.svg",
+    "LICENSE",
+    "README.md"
   ],
   "devDependencies": {
     "@types/mocha": "^10.0.10",

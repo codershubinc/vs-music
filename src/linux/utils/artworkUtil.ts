@@ -78,6 +78,8 @@ export class ArtworkUtil {
         console.log('Copied artwork from file URL:', vscodeUri);
 
         this.artworkCache.set(artUrl, vscodeUri);
+        console.log('Cached artwork URI for', artUrl, ':', vscodeUri);
+
         return vscodeUri;
     }
 
