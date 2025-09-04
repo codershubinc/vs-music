@@ -46,6 +46,7 @@
   "files": [
     "dist/**/*.js",
     "dist/**/*.html",
+    "dist/**/*.css",
     "ico.png",
     "icon.svg"
   ],

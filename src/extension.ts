@@ -3,7 +3,8 @@ import * as os from 'os';
 import { LinuxMusicService } from './linux/musicService';
 import { LinuxMusicWebviewProviderCompact } from './linux/ui/musicWebviewProviderCompact';
 import { WindowsMusicWebviewProvider } from './windows/ui/musicWebviewProvider';
-import FIND_FILE_PATHS from './utils/findFilePaths';
+import { ArtworkUtil } from './linux/utils/artworkUtil';
+import findFilePaths from './utils/findFilePaths';
 
 let musicService: LinuxMusicService | undefined;
 let webviewProvider: LinuxMusicWebviewProviderCompact | WindowsMusicWebviewProvider | undefined;
@@ -11,6 +12,9 @@ let webviewProvider: LinuxMusicWebviewProviderCompact | WindowsMusicWebviewProvi
 // This method is called when your extension is activated
 export async function activate(context: vscode.ExtensionContext) {
 	console.log('VS Music extension is now active!');
+
+	// Initialize artwork utility
+	ArtworkUtil.initialize(context);
 
 	try {
 		// Detect platform and initialize appropriate services
@@ -45,7 +49,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 async function initializeLinuxSupport(context: vscode.ExtensionContext): Promise<void> {
-	console.log("HTML file path is", FIND_FILE_PATHS.getPath(context, "src/linux/ui/webview/compactPlayer.html"));
+	console.log("HTML file path is", findFilePaths.getPath(context, "src/linux/ui/webview/compactPlayer.html"));
 
 	try {
 		// Initialize Linux music service

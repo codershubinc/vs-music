@@ -47,6 +47,14 @@ const extensionConfig = {
         {
           from: 'src/linux/ui/webview/compactPlayer.html',
           to: 'src/linux/ui/webview/compactPlayer.html'
+        },
+        {
+          from: 'src/linux/ui/webview/musicPlayer.css',
+          to: 'src/linux/ui/webview/musicPlayer.css'
+        },
+        {
+          from: 'src/linux/ui/webview/musicPlayer.js',
+          to: 'src/linux/ui/webview/musicPlayer.js'
         }
       ]
     })

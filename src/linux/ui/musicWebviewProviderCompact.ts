@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { LinuxMusicService } from '../musicService';
+import { ArtworkUtil } from '../utils/artworkUtil';
 
 export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvider {
     public static readonly viewType = 'vsMusicPlayer';
@@ -14,6 +15,9 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
     constructor(context: vscode.ExtensionContext, musicService: LinuxMusicService) {
         this._context = context;
         this._musicService = musicService;
+
+        // Initialize artwork utility
+        ArtworkUtil.initialize(context);
     }
 
     public resolveWebviewView(
@@ -125,11 +129,15 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
             let artworkUri = '';
             if (trackInfo.artUrl) {
                 try {
-                    const artworkFileUri = vscode.Uri.parse(trackInfo.artUrl);
-                    artworkUri = this._view.webview.asWebviewUri(artworkFileUri).toString();
-                    console.log('Converted artwork URI:', artworkUri);
+                    // Use the artwork utility to download and cache artwork
+                    const cachedArtworkUri = await ArtworkUtil.downloadArtwork(trackInfo.artUrl);
+                    if (cachedArtworkUri) {
+                        const artworkFileUri = vscode.Uri.parse(cachedArtworkUri);
+                        artworkUri = this._view.webview.asWebviewUri(artworkFileUri).toString();
+                        console.log('Converted cached artwork URI:', artworkUri);
+                    }
                 } catch (error) {
-                    console.warn('Error converting artwork URI:', error);
+                    console.warn('Error processing artwork:', error);
                 }
             }
 
@@ -153,14 +161,27 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
         try {
             // Try to read from the dist directory first (packaged extension)
             let htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'linux', 'ui', 'webview', 'compactPlayer.html');
+            let cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'linux', 'ui', 'webview', 'musicPlayer.css');
+            let jsPath = path.join(this._context.extensionPath, 'dist', 'src', 'linux', 'ui', 'webview', 'musicPlayer.js');
 
             if (!fs.existsSync(htmlPath)) {
                 // Fallback to src directory (development)
                 htmlPath = path.join(this._context.extensionPath, 'src', 'linux', 'ui', 'webview', 'compactPlayer.html');
+                cssPath = path.join(this._context.extensionPath, 'src', 'linux', 'ui', 'webview', 'musicPlayer.css');
+                jsPath = path.join(this._context.extensionPath, 'src', 'linux', 'ui', 'webview', 'musicPlayer.js');
             }
 
             console.log('Trying to read HTML from:', htmlPath);
-            const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+            let htmlContent = fs.readFileSync(htmlPath, 'utf8');
+
+            // Convert file paths to webview URIs
+            const cssUri = this._view?.webview.asWebviewUri(vscode.Uri.file(cssPath));
+            const jsUri = this._view?.webview.asWebviewUri(vscode.Uri.file(jsPath));
+
+            // Replace relative paths with webview URIs
+            htmlContent = htmlContent.replace('href="musicPlayer.css"', `href="${cssUri}"`);
+            htmlContent = htmlContent.replace('src="musicPlayer.js"', `src="${jsUri}"`);
+
             return htmlContent;
         } catch (error) {
             console.error('Error reading compact HTML file:', error);
@@ -169,34 +190,7 @@ export class LinuxMusicWebviewProviderCompact implements vscode.WebviewViewProvi
     }
 
     private _getFallbackHtml(): string {
-        return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VS Music Player</title>
-    <style>
-        body {
-            font-family: var(--vscode-font-family);
-            color: var(--vscode-foreground);
-            background-color: var(--vscode-editor-background);
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-        .error-message {
-            color: var(--vscode-errorForeground);
-        }
-    </style>
-</head>
-<body>
-    <div class="error-message">
-        <h3>?????? Music Player Error</h3>
-        <p>Unable to load compact player interface.</p>
-        <p>Please check the extension installation.</p>
-    </div>
-</body>
-</html>`;
+        return `<html><body><div style='color:red;padding:1em;'>Error loading music player UI.</div></body></html>`;
     }
 
     public async forceUpdate(): Promise<void> {

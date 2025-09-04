@@ -5,233 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src vscode-resource: data: https:;">
+        content="default-src 'none'; style-src 'unsafe-inline' vscode-resource:; script-src 'unsafe-inline' vscode-resource:; img-src vscode-resource: data: https:;">
     <title>VS Music Player - Compact</title>
-    <style>
-        body {
-            font-family: var(--vscode-font-family);
-            color: var(--vscode-foreground);
-            background-color: var(--vscode-editor-background);
-            margin: 0;
-            padding: 8px;
-            overflow: hidden;
-        }
-
-        .music-explorer {
-            max-width: 400px;
-            width: 100%;
-            margin: 0 auto;
-            border-radius: 8px;
-            background: var(--vscode-sideBar-background);
-            border: 1px solid var(--vscode-panel-border);
-        }
-
-        .no-music {
-            padding: 20px;
-            text-align: center;
-            color: var(--vscode-descriptionForeground);
-        }
-
-        .no-music h3 {
-            margin: 0 0 8px 0;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .no-music p {
-            margin: 0;
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        .track-info {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            gap: 12px;
-        }
-
-        .album-art {
-            width: 50px;
-            height: 50px;
-            border-radius: 4px;
-            background: var(--vscode-input-background);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--vscode-descriptionForeground);
-            font-size: 20px;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .album-art img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .track-details {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .track-title {
-            font-weight: 500;
-            font-size: 13px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--vscode-foreground);
-        }
-
-        .track-artist {
-            font-size: 11px;
-            color: var(--vscode-descriptionForeground);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-album {
-            font-size: 10px;
-            color: var(--vscode-descriptionForeground);
-            opacity: 0.8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .progress-container {
-            padding: 0 12px 8px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: var(--vscode-progressBar-background);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 4px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--vscode-progressBar-foreground);
-            border-radius: 2px;
-            transition: width 0.1s ease;
-            width: 0%;
-        }
-
-        .time-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: var(--vscode-descriptionForeground);
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            padding: 8px 12px 12px;
-            gap: 8px;
-        }
-
-        .control-btn {
-            background: var(--vscode-button-background);
-            color: var(--vscode-button-foreground);
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .control-btn:hover {
-            background: var(--vscode-button-hoverBackground);
-            transform: scale(1.05);
-        }
-
-        .control-btn:active {
-            transform: scale(0.95);
-        }
-
-        .control-btn.play-pause {
-            width: 36px;
-            height: 36px;
-            font-size: 16px;
-            background: var(--vscode-button-background);
-        }
-
-        .control-btn.play-pause:hover {
-            background: var(--vscode-button-hoverBackground);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 300px) {
-            .track-info {
-                padding: 8px;
-                gap: 8px;
-            }
-
-            .album-art {
-                width: 40px;
-                height: 40px;
-            }
-
-            .controls {
-                gap: 6px;
-            }
-
-            .control-btn {
-                width: 28px;
-                height: 28px;
-                font-size: 12px;
-            }
-
-            .control-btn.play-pause {
-                width: 32px;
-                height: 32px;
-                font-size: 14px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="musicPlayer.css">
 </head>
 
 <body>
-    <div class="music-explorer">
+    <div class="music-player">
         <div id="no-music" class="no-music">
-            <div class="music-icon">🎵</div>
-            <h3>No music currently playing</h3>
-            <p>Start playing music from any MPRIS-compatible player</p>
+            <div>🎵 No music playing</div>
         </div>
 
         <div id="music-info" class="hidden">
             <div class="track-info">
-                <div class="album-art" id="album-art">
-                    🎵
-                </div>
+                <div class="album-art" id="album-art">🎵</div>
                 <div class="track-details">
                     <div class="track-title" id="track-title">Unknown Track</div>
                     <div class="track-artist" id="track-artist">Unknown Artist</div>
-                    <div class="track-album" id="track-album">Unknown Album</div>
                 </div>
             </div>
 
-            <div class="progress-container">
+            <div class="progress-section">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
@@ -242,122 +36,14 @@
             </div>
 
             <div class="controls">
-                <button class="control-btn" id="prev-btn" title="Previous">⏮️</button>
-                <button class="control-btn play-pause" id="play-pause-btn" title="Play/Pause">▶️</button>
-                <button class="control-btn" id="next-btn" title="Next">⏭️</button>
+                <button class="control-btn" id="prev-btn">⏮</button>
+                <button class="control-btn play-pause" id="play-pause-btn">▶️</button>
+                <button class="control-btn" id="next-btn">⏭</button>
             </div>
         </div>
     </div>
 
-    <script>
-        const vscode = acquireVsCodeApi();
-        let currentTrack = null;
-
-        // Handle messages from extension
-        window.addEventListener('message', event => {
-            const message = event.data;
-            console.log('Webview received message:', message);
-
-            switch (message.command) {
-                case 'updateTrack':
-                    updateTrack(message.track, message.artworkUri, message.position);
-                    break;
-                case 'updateProgress':
-                    updateProgress(message.position);
-                    break;
-            }
-        });
-
-        // Control button event listeners
-        document.getElementById('play-pause-btn').addEventListener('click', () => {
-            vscode.postMessage({ command: 'playPause' });
-        });
-
-        document.getElementById('prev-btn').addEventListener('click', () => {
-            vscode.postMessage({ command: 'previous' });
-        });
-
-        document.getElementById('next-btn').addEventListener('click', () => {
-            vscode.postMessage({ command: 'next' });
-        });
-
-        function updateTrack(track, artworkUri, position) {
-            console.log('Updating track:', track, 'Artwork:', artworkUri, 'Position:', position);
-
-            if (!track || !track.title) {
-                showNoMusic();
-                return;
-            }
-
-            currentTrack = track;
-
-            // Show music info, hide no-music
-            document.getElementById('no-music').classList.add('hidden');
-            document.getElementById('music-info').classList.remove('hidden');
-
-            // Update track details
-            document.getElementById('track-title').textContent = track.title || 'Unknown Title';
-            document.getElementById('track-artist').textContent = track.artist || 'Unknown Artist';
-            document.getElementById('track-album').textContent = track.album || 'Unknown Album';
-
-            // Update artwork
-            const albumArt = document.getElementById('album-art');
-            if (artworkUri && artworkUri !== '') {
-                albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" onerror="this.parentElement.innerHTML='🎵'">`;
-            } else {
-                albumArt.innerHTML = '🎵';
-            }
-
-            // Update play/pause button
-            const playPauseBtn = document.getElementById('play-pause-btn');
-            if (track.status === 'playing') {
-                playPauseBtn.textContent = '⏸️';
-                playPauseBtn.title = 'Pause';
-            } else {
-                playPauseBtn.textContent = '▶️';
-                playPauseBtn.title = 'Play';
-            }
-
-            // Update progress and time
-            updateProgress(position || track.position || 0);
-            updateTime(track.duration || 0);
-        }
-
-        function updateProgress(currentPosition) {
-            if (!currentTrack) return;
-
-            const duration = currentTrack.duration || 0;
-            const progressFill = document.getElementById('progress-fill');
-            const currentTimeElement = document.getElementById('current-time');
-
-            if (duration > 0) {
-                const percentage = (currentPosition / duration) * 100;
-                progressFill.style.width = `${Math.min(percentage, 100)}%`;
-            }
-
-            currentTimeElement.textContent = formatTime(currentPosition);
-        }
-
-        function updateTime(duration) {
-            document.getElementById('total-time').textContent = formatTime(duration);
-        }
-
-        function showNoMusic() {
-            document.getElementById('music-info').classList.add('hidden');
-            document.getElementById('no-music').classList.remove('hidden');
-            currentTrack = null;
-        }
-
-        function formatTime(seconds) {
-            if (!seconds || seconds < 0) return '0:00';
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-        }
-
-        // Signal that webview is ready
-        vscode.postMessage({ command: 'webviewReady' });
-    </script>
+    <script src="musicPlayer.js"></script>
 </body>
 
 </html>

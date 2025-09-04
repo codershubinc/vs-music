@@ -1,227 +1,121 @@
-/* VS Music Player Webview Styles */
+/* VS Code Music Player - Compact UI Styles */
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 16px;
-    background: var(--vscode-editor-background);
-    color: var(--vscode-editor-foreground);
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-/* Utility classes */
-.hidden {
-    display: none !important;
-}
-
-.music-container {
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-/* No Music State */
-.no-music-container {
-    text-align: center;
-    padding: 32px 16px;
-    opacity: 0.7;
-}
-
-.music-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-
-.no-music-container h2 {
-    margin: 0 0 8px 0;
-    font-size: 18px;
-    font-weight: 600;
+    font-family: var(--vscode-font-family);
     color: var(--vscode-foreground);
-}
-
-.no-music-container p {
-    margin: 0 0 16px 0;
-    color: var(--vscode-descriptionForeground);
+    background-color: var(--vscode-editor-background);
+    margin: 0;
+    padding: 8px;
+    overflow: hidden;
     font-size: 13px;
 }
 
-.supported-players {
+.music-player {
     display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.supported-players span {
-    background: var(--vscode-badge-background);
-    color: var(--vscode-badge-foreground);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 500;
-}
-
-/* Music Info Display */
-.music-info {
+    flex-direction: column;
     background: var(--vscode-sideBar-background);
-    border: 1px solid var(--vscode-sideBar-border);
     border-radius: 8px;
-    padding: 16px;
+    overflow: hidden;
+    max-width: 100%;
+    border: 1px solid var(--vscode-widget-border, rgba(255, 255, 255, 0.1));
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.music-info.hidden {
-    display: none;
+/* No music state */
+.no-music {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
 }
 
-.track-container {
+/* Track info section */
+.track-info {
     display: flex;
+    align-items: center;
+    padding: 16px;
     gap: 16px;
-    margin-bottom: 16px;
-    align-items: flex-start;
+    background: var(--vscode-sideBar-background);
+    border-bottom: 1px solid var(--vscode-widget-border, rgba(255, 255, 255, 0.05));
 }
 
-.artwork-container {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
+.album-art {
+    width: 56px;
+    height: 56px;
     border-radius: 6px;
-    overflow: hidden;
     background: var(--vscode-input-background);
-    border: 1px solid var(--vscode-input-border);
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vscode-descriptionForeground);
+    font-size: 24px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid var(--vscode-widget-border, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.artwork {
+.album-art img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 6px;
 }
 
-.artwork-placeholder {
-    width: 100%;
-    height: 100%;
-    background: var(--vscode-input-background);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: var(--vscode-input-placeholderForeground);
-    border: 2px solid var(--vscode-input-border);
-    border-radius: 6px;
-}
-
 .track-details {
     flex: 1;
-    text-align: left;
     min-width: 0;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .track-title {
     font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 8px;
-    color: var(--vscode-foreground);
+    font-size: 14px;
     line-height: 1.3;
-    overflow: hidden;
     white-space: nowrap;
-    animation: scroll-text 15s linear infinite;
-    padding-right: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--vscode-foreground);
+    margin: 0;
 }
 
 .track-artist {
-    font-size: 14px;
-    color: var(--vscode-descriptionForeground);
-    margin-bottom: 4px;
-    font-weight: 500;
-    overflow: hidden;
-    white-space: nowrap;
-    animation: scroll-text 12s linear infinite;
-    padding-right: 20px;
-}
-
-.track-album {
     font-size: 12px;
-    color: var(--vscode-disabledForeground);
-    font-style: italic;
-    opacity: 0.8;
+    line-height: 1.3;
+    color: var(--vscode-descriptionForeground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.9;
 }
 
-@keyframes scroll-text {
-    0% {
-        transform: translateX(0%);
-    }
-
-    20% {
-        transform: translateX(0%);
-    }
-
-    80% {
-        transform: translateX(calc(-100% + 200px));
-    }
-
-    100% {
-        transform: translateX(calc(-100% + 200px));
-    }
-}
-
-.track-title:hover,
-.track-artist:hover {
-    animation-play-state: paused;
-}
-
-.status-indicator {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 10px;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-.status-playing {
-    background: var(--vscode-testing-iconPassed);
-    color: white;
-}
-
-.status-paused {
-    background: var(--vscode-testing-iconQueued);
-    color: white;
-}
-
-.status-stopped {
-    background: var(--vscode-testing-iconFailed);
-    color: white;
-}
-
-/* Progress Bar */
-.progress-container {
-    margin: 16px 0;
+/* Progress section */
+.progress-section {
+    padding: 0 16px 12px;
+    background: var(--vscode-sideBar-background);
 }
 
 .progress-bar {
     width: 100%;
-    height: 4px;
-    background: var(--vscode-progressBar-background);
-    border-radius: 2px;
+    height: 6px;
+    background: var(--vscode-input-background);
+    border-radius: 3px;
     overflow: hidden;
     margin-bottom: 8px;
+    border: 1px solid var(--vscode-widget-border, rgba(255, 255, 255, 0.1));
+    cursor: pointer;
 }
 
 .progress-fill {
     height: 100%;
-    background: var(--vscode-progressBar-foreground);
-    border-radius: 2px;
-    transition: width 0.5s ease;
+    background: linear-gradient(90deg, var(--vscode-button-background), var(--vscode-button-hoverBackground));
+    border-radius: 3px;
+    transition: width 0.2s ease;
     width: 0%;
 }
 
-.progress-time {
+.time-info {
     display: flex;
     justify-content: space-between;
     font-size: 11px;
@@ -229,59 +123,61 @@ body {
     font-weight: 500;
 }
 
-/* Controls */
+/* Controls section */
 .controls {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 12px 16px 16px;
     gap: 12px;
-    margin-top: 16px;
+    background: var(--vscode-sideBar-background);
 }
 
 .control-btn {
+    background: var(--vscode-button-secondaryBackground, var(--vscode-input-background));
+    color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+    border: 1px solid var(--vscode-widget-border, rgba(255, 255, 255, 0.1));
+    border-radius: 50%;
     width: 36px;
     height: 36px;
-    border: none;
-    border-radius: 6px;
-    background: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    cursor: pointer;
-    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .control-btn:hover {
     background: var(--vscode-button-hoverBackground);
-    transform: translateY(-1px);
+    color: var(--vscode-button-foreground);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .control-btn:active {
-    transform: translateY(0);
+    transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.play-pause-btn {
+.control-btn.play-pause {
     width: 44px;
     height: 44px;
-    font-size: 16px;
+    font-size: 18px;
     background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.play-pause-btn:hover {
+.control-btn.play-pause:hover {
     background: var(--vscode-button-hoverBackground);
+    transform: scale(1.08);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 }
 
-/* Responsive adjustments */
-@media (max-width: 300px) {
-    .track-container {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .track-details {
-        text-align: center;
-    }
+/* Utility classes */
+.hidden {
+    display: none !important;
 }

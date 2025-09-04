@@ -1,36 +1,34 @@
-// VS Music Player Webview Script
-
-(function () {
+// VS Music Player - Compact UI JavaScript
+(function() {
     'use strict';
 
-    // Get VS Code API
     const vscode = acquireVsCodeApi();
-
-    // DOM elements
     let currentTrack = null;
-    let webviewReady = false;
 
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeWebview();
+    // Handle messages from extension
+    window.addEventListener('message', event => {
+        const message = event.data;
+        console.log('Webview received message:', message);
+
+        switch (message.command) {
+            case 'updateTrack':
+                updateTrack(message.track, message.artworkUri, message.position);
+                break;
+            case 'updateProgress':
+                updateProgress(message.position);
+                break;
+        }
     });
 
-    function initializeWebview() {
-        console.log('Initializing VS Music webview...');
-
-        // Setup control event listeners
-        setupControlEvents();
-
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeControls();
         // Signal that webview is ready
-        webviewReady = true;
-        vscode.postMessage({
-            command: 'webviewReady'
-        });
+        vscode.postMessage({ command: 'webviewReady' });
+    });
 
-        console.log('Webview ready signal sent');
-    }
-
-    function setupControlEvents() {
+    function initializeControls() {
+        // Control button event listeners
         const playPauseBtn = document.getElementById('play-pause-btn');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
@@ -43,54 +41,39 @@
 
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
-                vscode.postMessage({ command: 'previousTrack' });
+                vscode.postMessage({ command: 'previous' });
             });
         }
 
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
-                vscode.postMessage({ command: 'nextTrack' });
+                vscode.postMessage({ command: 'next' });
             });
+        }
+
+        // Progress bar click for seeking (future enhancement)
+        const progressBar = document.getElementById('progress-bar');
+        if (progressBar) {
+            progressBar.addEventListener('click', handleProgressClick);
         }
     }
 
-    // Listen for messages from extension
-    window.addEventListener('message', event => {
-        const message = event.data;
+    function updateTrack(track, artworkUri, position) {
+        console.log('Updating track:', track, 'Artwork:', artworkUri, 'Position:', position);
 
-        switch (message.command) {
-            case 'updateTrack':
-                updateTrackInfo(message.track);
-                break;
-            case 'updateStatus':
-                updatePlaybackStatus(message.status);
-                break;
-            case 'updatePosition':
-                updatePosition(message.position, message.duration);
-                break;
-            case 'noMusic':
-                showNoMusicState();
-                break;
-        }
-    });
-
-    function updateTrackInfo(track) {
-        if (!track) {
-            showNoMusicState();
+        if (!track || !track.title) {
+            showNoMusic();
             return;
         }
 
         currentTrack = track;
-        console.log('Updating track info:', track);
 
-        // Show music info, hide no-music state
-        const musicInfo = document.getElementById('music-info');
-        const noMusic = document.getElementById('no-music');
-
-        if (musicInfo && noMusic) {
-            musicInfo.style.display = 'block';
-            noMusic.style.display = 'none';
-        }
+        // Show music info, hide no-music
+        const noMusicEl = document.getElementById('no-music');
+        const musicInfoEl = document.getElementById('music-info');
+        
+        if (noMusicEl) noMusicEl.classList.add('hidden');
+        if (musicInfoEl) musicInfoEl.classList.remove('hidden');
 
         // Update track details
         updateElement('track-title', track.title || 'Unknown Title');
@@ -98,167 +81,99 @@
         updateElement('track-album', track.album || 'Unknown Album');
 
         // Update artwork
-        updateArtwork(track.artworkPath);
+        updateArtwork(artworkUri);
 
-        // Update status
-        updatePlaybackStatus(track.status);
+        // Update play/pause button
+        updatePlayPauseButton(track.status);
 
-        // Update progress
-        if (track.position !== undefined && track.duration !== undefined) {
-            updatePosition(track.position, track.duration);
-        }
+        // Update progress and time
+        updateProgress(position || track.position || 0);
+        updateTime(track.duration || 0);
     }
 
     function updateElement(id, text) {
-        const element = document.querySelector(`.${id}`);
+        const element = document.getElementById(id);
         if (element) {
             element.textContent = text;
-            element.title = text; // Add tooltip for long text
         }
     }
 
-    function updateArtwork(artworkPath) {
-        const artworkContainer = document.querySelector('.artwork-container');
-        if (!artworkContainer) {
-            return;
-        }
+    function updateArtwork(artworkUri) {
+        const albumArt = document.getElementById('album-art');
+        if (!albumArt) return;
 
-        // Remove existing artwork
-        const existingArtwork = artworkContainer.querySelector('.artwork');
-        if (existingArtwork) {
-            existingArtwork.remove();
-        }
-
-        const placeholder = artworkContainer.querySelector('.artwork-placeholder');
-
-        if (artworkPath && artworkPath !== 'undefined') {
-            // Create and add artwork image
-            const img = document.createElement('img');
-            img.className = 'artwork';
-            img.src = artworkPath;
-            img.alt = 'Album artwork';
-
-            img.onload = () => {
-                if (placeholder) {
-                    placeholder.style.display = 'none';
-                }
-            };
-
-            img.onerror = () => {
-                if (placeholder) {
-                    placeholder.style.display = 'flex';
-                }
-            };
-
-            artworkContainer.appendChild(img);
+        if (artworkUri && artworkUri !== '') {
+            albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" onerror="this.parentElement.innerHTML='🎵'">`;
         } else {
-            // Show placeholder
-            if (placeholder) {
-                placeholder.style.display = 'flex';
-            }
+            albumArt.innerHTML = '🎵';
         }
     }
 
-    function updatePlaybackStatus(status) {
-        const statusIndicator = document.querySelector('.status-indicator');
-        const statusIcon = document.querySelector('.status-icon');
+    function updatePlayPauseButton(status) {
         const playPauseBtn = document.getElementById('play-pause-btn');
+        if (!playPauseBtn) return;
 
-        // Remove existing status classes
-        if (statusIndicator) {
-            statusIndicator.className = 'status-indicator';
-        }
-
-        switch (status) {
-            case 'playing':
-                if (statusIndicator) {
-                    statusIndicator.classList.add('status-playing');
-                }
-                if (statusIcon) {
-                    statusIcon.textContent = '▶️';
-                }
-                if (playPauseBtn) {
-                    playPauseBtn.textContent = '⏸️';
-                    playPauseBtn.title = 'Pause';
-                }
-                break;
-
-            case 'paused':
-                if (statusIndicator) {
-                    statusIndicator.classList.add('status-paused');
-                }
-                if (statusIcon) {
-                    statusIcon.textContent = '⏸️';
-                }
-                if (playPauseBtn) {
-                    playPauseBtn.textContent = '▶️';
-                    playPauseBtn.title = 'Play';
-                }
-                break;
-
-            case 'stopped':
-            default:
-                if (statusIndicator) {
-                    statusIndicator.classList.add('status-stopped');
-                }
-                if (statusIcon) {
-                    statusIcon.textContent = '⏹️';
-                }
-                if (playPauseBtn) {
-                    playPauseBtn.textContent = '▶️';
-                    playPauseBtn.title = 'Play';
-                }
-                break;
+        if (status === 'playing') {
+            playPauseBtn.textContent = '⏸️';
+            playPauseBtn.title = 'Pause';
+        } else {
+            playPauseBtn.textContent = '▶️';
+            playPauseBtn.title = 'Play';
         }
     }
 
-    function updatePosition(position, duration) {
-        // Update progress bar
-        const progressFill = document.querySelector('.progress-fill');
-        if (progressFill && duration > 0) {
-            const percentage = (position / duration) * 100;
-            progressFill.style.width = `${Math.min(percentage, 100)}%`;
-        }
+    function updateProgress(currentPosition) {
+        if (!currentTrack) return;
 
-        // Update time displays
-        const currentTimeElement = document.querySelector('.current-time');
-        const totalTimeElement = document.querySelector('.total-time');
+        const duration = currentTrack.duration || 0;
+        const progressFill = document.getElementById('progress-fill');
+        const currentTimeElement = document.getElementById('current-time');
+
+        if (progressFill && duration > 0) {
+            const percentage = Math.min((currentPosition / duration) * 100, 100);
+            progressFill.style.width = `${percentage}%`;
+        }
 
         if (currentTimeElement) {
-            currentTimeElement.textContent = formatTime(position);
+            currentTimeElement.textContent = formatTime(currentPosition);
         }
+    }
 
+    function updateTime(duration) {
+        const totalTimeElement = document.getElementById('total-time');
         if (totalTimeElement) {
             totalTimeElement.textContent = formatTime(duration);
         }
     }
 
-    function showNoMusicState() {
-        const musicInfo = document.getElementById('music-info');
-        const noMusic = document.getElementById('no-music');
-
-        if (musicInfo && noMusic) {
-            musicInfo.style.display = 'none';
-            noMusic.style.display = 'block';
-        }
-
+    function showNoMusic() {
+        const musicInfoEl = document.getElementById('music-info');
+        const noMusicEl = document.getElementById('no-music');
+        
+        if (musicInfoEl) musicInfoEl.classList.add('hidden');
+        if (noMusicEl) noMusicEl.classList.remove('hidden');
+        
         currentTrack = null;
     }
 
     function formatTime(seconds) {
-        if (!seconds || seconds < 0) {
-            return '0:00';
-        }
-
+        if (!seconds || seconds < 0) return '0:00';
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    // Debug function
-    window.debugWebview = function () {
-        console.log('Current track:', currentTrack);
-        console.log('Webview ready:', webviewReady);
-    };
+    function handleProgressClick(event) {
+        if (!currentTrack || !currentTrack.duration) return;
+        
+        const progressBar = event.currentTarget;
+        const rect = progressBar.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const percentage = clickX / rect.width;
+        const newPosition = percentage * currentTrack.duration;
+        
+        // Send seek command to extension (for future implementation)
+        // vscode.postMessage({ command: 'seek', position: newPosition });
+    }
 
 })();
