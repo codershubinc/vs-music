@@ -5,6 +5,7 @@
     const vscode = acquireVsCodeApi();
     let currentTrack = null;
     let progressUpdateInterval = null;
+    let manualUpdatedTime = 0;
 
     // Message listener for extension communication
     window.addEventListener('message', event => {
@@ -75,18 +76,18 @@
 
         currentTrack = track;
 
-        // Only update position from extension if:
-        // 1. We don't have a manual timer running AND it's playing, OR
-        // 2. Status changed (pause/play), OR  
-        // 3. It's a new track, OR
-        // 4. The track is not currently playing
-        if (!progressUpdateInterval || statusChanged || isNewTrack || track.status !== 'playing') {
+        // Only update position from extension if we don't have manual timer running
+        // OR if it's a new track OR if status changed to non-playing state
+        const isPlaying = (track.status === 'playing' || track.status === 'Playing');
+        const wasPlaying = (currentTrack?.status === 'playing' || currentTrack?.status === 'Playing');
+
+        if (!progressUpdateInterval || isNewTrack || (wasPlaying && !isPlaying)) {
             if (position !== undefined) {
                 currentTrack.position = position;
-                console.log(`Position updated from extension: ${position}s`);
+                console.log(`Position updated from extension: ${position}s (reason: ${!progressUpdateInterval ? 'no timer' : isNewTrack ? 'new track' : 'stopped playing'})`);
             }
         } else {
-            // Keep our manual position if timer is running and track is playing
+            // Keep our manual position if timer is running
             console.log(`Keeping manual position: ${currentTrack.position}s (extension sent: ${position}s)`);
         }
 
@@ -159,7 +160,6 @@
     }
 
     function startManualTimeUpdate() {
-        let manualUpdatedTime;
         // Clear any existing interval
         if (progressUpdateInterval) {
             clearInterval(progressUpdateInterval);
@@ -174,10 +174,10 @@
             progressUpdateInterval = setInterval(() => {
                 if (currentTrack && (currentTrack.status === 'playing' || currentTrack.status === 'Playing')) {
                     // Increment position by 1 second
-                    manualUpdatedTime = (currentTrack.position || 0) + 1;
+                    const newPosition = (currentTrack.position || 0) + 1;
 
                     // Don't exceed duration
-                    if (manualUpdatedTime >= currentTrack.duration) {
+                    if (newPosition >= currentTrack.duration) {
                         currentTrack.position = currentTrack.duration;
                         clearInterval(progressUpdateInterval);
                         progressUpdateInterval = null;
@@ -186,12 +186,12 @@
                     }
 
                     // Store the updated position back to the track object
-                    currentTrack.position = manualUpdatedTime;
+                    currentTrack.position = newPosition;
 
-                    console.log(`Manual Update - Position: ${manualUpdatedTime}s / ${currentTrack.duration}s`);
+                    console.log(`Manual Update - Position: ${newPosition}s / ${currentTrack.duration}s`);
 
                     // Update progress display
-                    updateProgress(manualUpdatedTime);
+                    updateProgress(newPosition);
                 } else {
                     // Stop interval if not playing
                     console.log(`Manual update stopped - status: ${currentTrack?.status}`);
@@ -300,6 +300,21 @@
 
         // TODO: Implement seeking functionality
         // vscode.postMessage({ command: 'seek', position: newPosition });
+    }
+
+    function updateTimeDisplay() {
+        // Change the element in html to show current time and total duration
+        const currentTimeElement = document.getElementById('current-time');
+        const totalTimeElement = document.getElementById('total-time');
+
+        if (currentTrack) {
+            if (currentTimeElement) {
+                currentTimeElement.textContent = formatTime(currentTrack.position || 0);
+            }
+            if (totalTimeElement) {
+                totalTimeElement.textContent = formatTime(currentTrack.duration || 0);
+            }
+        }
     }
 
 })();
