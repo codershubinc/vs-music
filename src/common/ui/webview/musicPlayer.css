@@ -39,8 +39,8 @@ body {
 }
 
 .album-art {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
     border-radius: 6px;
     background: var(--vscode-input-background);
     display: flex;
@@ -71,7 +71,7 @@ body {
 
 .track-title {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 18px;
     line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
@@ -88,6 +88,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     opacity: 0.9;
+    font-family: cursive;
 }
 
 /* Progress section */
@@ -98,7 +99,7 @@ body {
 
 .progress-bar {
     width: 100%;
-    height: 6px;
+    height: 4px;
     background: var(--vscode-input-background);
     border-radius: 3px;
     overflow: hidden;
@@ -137,9 +138,11 @@ body {
     background: var(--vscode-button-secondaryBackground, var(--vscode-input-background));
     color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
     border: 1px solid var(--vscode-widget-border, rgba(255, 255, 255, 0.1));
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    border-radius: 12px;
+    width: 52px;
+    height: 52px;
+    font-weight: 700;
+    font-size: larger;
     display: flex;
     align-items: center;
     justify-content: center;
