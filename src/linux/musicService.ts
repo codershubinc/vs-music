@@ -115,7 +115,7 @@ export class LinuxMusicService {
             const playerctl = spawn('playerctl', [
                 'metadata',
                 '--format',
-                '{{title}}|{{mpris:artUrl}}|{{artist}}|{{album}}|{{duration(position)}}|{{duration(mpris:length)}}|{{status}}|{{playerName}}'
+                '{"title":"{{title}}","artUrl":"{{mpris:artUrl}}","artist":"{{artist}}","album":"{{album}}","position":"{{duration(position)}}","length":"{{duration(mpris:length)}}","status":"{{status}}","player":"{{playerName}}"}'
             ]);
 
             let output = '';
@@ -125,20 +125,21 @@ export class LinuxMusicService {
 
             playerctl.on('close', (code) => {
                 if (code === 0 && output.trim()) {
-                    const parts = output.trim().split('|');
-                    if (parts.length >= 7) {
+                    try {
+                        const data = JSON.parse(output.trim());
                         const track: TrackInfo = {
-                            title: parts[0] || 'Unknown Title',
-                            artUrl: parts[1] || '',
-                            artist: parts[2] || 'Unknown Artist',
-                            album: parts[3] || 'Unknown Album',
-                            position: this.parseDuration(parts[4]),
-                            duration: this.parseDuration(parts[5]),
-                            status: (parts[6]?.toLowerCase() as any) || 'stopped',
-                            player: parts[7] || 'Unknown Player'
+                            title: data.title || 'Unknown Title',
+                            artUrl: data.artUrl || '',
+                            artist: data.artist || 'Unknown Artist',
+                            album: data.album || 'Unknown Album',
+                            position: this.parseDuration(data.position),
+                            duration: this.parseDuration(data.length),
+                            status: (data.status?.toLowerCase() as any) || 'stopped',
+                            player: data.player || 'Unknown Player'
                         };
                         resolve(track);
-                    } else {
+                    } catch (error) {
+                        console.error('Failed to parse playerctl JSON output:', error);
                         resolve(null);
                     }
                 } else {
