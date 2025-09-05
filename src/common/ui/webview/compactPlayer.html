@@ -6,39 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'none'; style-src 'unsafe-inline' vscode-resource:; script-src 'unsafe-inline' vscode-resource:; img-src vscode-resource: data: https:;">
-    <title>VS Music Player - Compact</title>
+    <title>Music Player</title>
     <link rel="stylesheet" href="musicPlayer.css">
 </head>
 
 <body>
-    <div class="music-player">
-        <div id="no-music" class="no-music">
-            <div>🎵 No music playing</div>
-        </div>
-
-        <div id="music-info" class="hidden">
-            <div class="track-info">
-                <div class="album-art" id="album-art">🎵</div>
-                <div class="track-details">
-                    <div class="track-title" id="track-title">Unknown Track</div>
-                    <div class="track-artist" id="track-artist">Unknown Artist</div>
-                </div>
+    <div class="music-container">
+        <div id="musicContent">
+            <div id="no-music" class="no-music">
+                <div class="no-music-icon">🎵</div>
+                <div>No music currently playing</div>
             </div>
 
-            <div class="progress-section">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
+            <div id="music-info" class="hidden">
+                <div class="track-header">
+                    <div class="music-icon" id="album-art">🎵</div>
+                    <div class="track-info">
+                        <div class="track-title" id="track-title">Unknown Title</div>
+                        <div class="track-artist" id="track-artist">Unknown Artist</div>
+                        <div class="track-album" id="track-album">Unknown Album</div>
+                    </div>
+                    <div class="status-indicator" id="status-indicator">⏹</div>
                 </div>
-                <div class="time-info">
-                    <span id="current-time">0:00</span>
-                    <span id="total-time">0:00</span>
-                </div>
-            </div>
 
-            <div class="controls">
-                <button class="control-btn" id="prev-btn">⏮</button>
-                <button class="control-btn play-pause" id="play-pause-btn">▶️</button>
-                <button class="control-btn" id="next-btn">⏭</button>
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-time">
+                        <span id="current-time">0:00</span>
+                        <span id="total-time">0:00</span>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn" id="prev-btn" title="Previous Track">⏮</button>
+                    <button class="control-btn play-pause" id="play-pause-btn" title="Play/Pause">▶</button>
+                    <button class="control-btn" id="next-btn" title="Next Track">⏭</button>
+                </div>
             </div>
         </div>
     </div>

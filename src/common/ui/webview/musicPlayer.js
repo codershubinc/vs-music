@@ -77,6 +77,7 @@
         updateElement('track-album', track.album || 'Unknown Album');
 
         updateArtwork(artworkUri);
+        updateStatusIndicator(track.status);
         updatePlayPauseButton(track.status);
         updateProgress(position || track.position || 0);
         updateTime(track.duration || 0);
@@ -102,6 +103,28 @@
         }
     }
 
+    function updateStatusIndicator(status) {
+        const statusIndicator = document.getElementById('status-indicator');
+        if (!statusIndicator) {
+            return;
+        }
+
+        // Remove existing status classes
+        statusIndicator.className = 'status-indicator';
+
+        // Add appropriate status class and icon
+        if (status === 'playing') {
+            statusIndicator.classList.add('status-playing');
+            statusIndicator.textContent = '▶';
+        } else if (status === 'paused') {
+            statusIndicator.classList.add('status-paused');
+            statusIndicator.textContent = '⏸';
+        } else {
+            statusIndicator.classList.add('status-stopped');
+            statusIndicator.textContent = '⏹';
+        }
+    }
+
     function updatePlayPauseButton(status) {
         const playPauseBtn = document.getElementById('play-pause-btn');
         if (!playPauseBtn) {
@@ -109,10 +132,10 @@
         }
 
         if (status === 'playing') {
-            playPauseBtn.innerHTML = '⏸️Pa';
+            playPauseBtn.innerHTML = '⏸️';
             playPauseBtn.title = 'Pause';
         } else {
-            playPauseBtn.innerHTML = '▶️Pl';
+            playPauseBtn.innerHTML = '▶️';
             playPauseBtn.title = 'Play';
         }
     }
@@ -138,8 +161,19 @@
 
     function updateTime(duration) {
         const totalTimeElement = document.getElementById('total-time');
+        const progressContainer = document.getElementById('progress-container');
+
         if (totalTimeElement) {
             totalTimeElement.textContent = formatTime(duration);
+        }
+
+        // Show/hide progress container based on whether we have duration
+        if (progressContainer) {
+            if (duration && duration > 0) {
+                progressContainer.style.display = 'block';
+            } else {
+                progressContainer.style.display = 'none';
+            }
         }
     }
 
