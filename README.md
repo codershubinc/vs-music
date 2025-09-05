@@ -4,9 +4,13 @@
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux.svg)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Publisher](https://img.shields.io/badge/Publisher-codershubinc-orange.svg)
-![Version](https://img.shields.io/badge/Version-0.1.2-blue.svg)
+![Version](https://img.shields.io/badge/Version-0.1.4%20beta-blue.svg)
 
 A Visual Studio Code extension that displays currently playing music information and provides playback controls directly in your editor. Perfect for Linux developers who want to stay in their coding flow while managing their music.
+
+> **🚧 BETA VERSION NOTICE**: This extension is in active development. While functional, you may encounter minor bugs. We're continuously improving it!
+>
+> **⚠️ LINUX ONLY**: Currently supports Linux systems only. Windows & macOS support coming soon.
 
 ## 📸 Screenshots
 
@@ -23,10 +27,14 @@ _The extension showing current track information in VS Code with the music playe
 - **Real-time Updates**: Automatically updates when tracks change
 - **Album Artwork Display**: Shows album artwork in the music panel when available
 - **Side-by-side Layout**: Clean layout with artwork and track info displayed together
+- **Scrolling Text Animation**: Long track titles and artist names flow horizontally for full readability
+- **Interactive Text Control**: Hover over text to pause scrolling animation
 - **Corner Widget**: Optional floating widget for quick access
 - **Configurable Display**: Customize what information is shown and where
 
-## 🐧 Linux Compatibility :: ( we are adding for win and mac shortly)
+## 🐧 Linux Compatibility
+
+> **⚠️ Platform Notice**: This extension currently supports **Linux only**. Windows and macOS support is in development.
 
 This extension is specifically designed for Linux systems and uses `playerctl` to communicate with MPRIS-compatible media players.
 
@@ -52,7 +60,9 @@ The following Linux music players are supported through MPRIS/playerctl:
 
 ### Prerequisites
 
-**Important**: You must have `playerctl` installed on your Linux system for this extension to work.
+> **🚨 Critical Requirement**: You **MUST** have `playerctl` installed on your Linux system for this extension to work properly.
+>
+> **Not sure if you have it?** Run `playerctl --version` in your terminal to check.
 
 #### Install playerctl
 
@@ -118,7 +128,7 @@ playerctl status
 
 2. **From VSIX file**:
 
-   - Download the `music-0.1.2.vsix` file from [releases](https://github.com/codershubinc/vscode-music/releases)
+   - Download the `music-0.1.4.vsix` file from [releases](https://github.com/codershubinc/vscode-music/releases)
    - Open VS Code
    - Press Ctrl+Shift+P and type "Extensions: Install from VSIX"
    - Select the downloaded .vsix file
@@ -157,6 +167,8 @@ Access these commands via the Command Palette (Ctrl+Shift+P):
 
 - Located in the Explorer sidebar
 - Shows detailed track information with album artwork
+- Features smooth scrolling text animation for long titles and artist names
+- Hover over text to pause scrolling for better readability
 - Includes playback controls
 - Features a clean side-by-side layout with artwork and track details
 - Automatically caches artwork for better performance
@@ -197,20 +209,26 @@ Configure the extension through VS Code settings (File → Preferences → Setti
 
 ## 🔧 Troubleshooting
 
+> **💡 Quick Fix**: 90% of issues are solved by installing `playerctl` and restarting VS Code!
+
 ### Common Issues
 
-#### "playerctl not available" message
+#### ❌ "playerctl not available" message
+
+> **🔴 This is the most common issue!**
 
 - **Solution**: Install playerctl using your distribution's package manager (see Installation section)
 - **Verify**: Run `playerctl --version` in terminal
+- **Expected Output**: Should show version number like `playerctl v2.4.1`
 
-#### Extension doesn't detect music
+#### ❌ Extension doesn't detect music
 
 - **Check**: Ensure your music player supports MPRIS
 - **Test**: Run `playerctl metadata` while music is playing
 - **Restart**: Try restarting VS Code after starting your music player
+- **Player List**: Run `playerctl -l` to see available players
 
-#### No controls working
+#### ❌ No controls working
 
 - **Verify**: Test playerctl commands manually:
   ```bash
@@ -280,19 +298,29 @@ bun run package
 bun run build-vsix
 ```
 
-## 👨‍💻 Author
+## 👨‍💻 Author & Connect
 
 **Swapnil Ingle** ([@codershubinc](https://github.com/codershubinc))
 
-- Publisher: `codershubinc`
-- GitHub: <https://github.com/codershubinc/vscode-music>
-- Issues: <https://github.com/codershubinc/vscode-music/issues>
+### 🌐 Find me on
+
+[![GitHub](https://img.shields.io/badge/GitHub-codershubinc-181717?style=for-the-badge&logo=github)](https://github.com/codershubinc)
+[![Twitter](https://img.shields.io/badge/Twitter-@codershubinc-1DA1F2?style=for-the-badge&logo=twitter)](https://twitter.com/codershubinc)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Swapnil%20Ingle-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/swapnil-ingle)
+[![Instagram](https://img.shields.io/badge/Instagram-@codershubinc-E4405F?style=for-the-badge&logo=instagram)](https://instagram.com/codershubinc)
+[![YouTube](https://img.shields.io/badge/YouTube-CodersHub-FF0000?style=for-the-badge&logo=youtube)](https://youtube.com/@codershubinc)
+
+### 📬 Project Links
+
+- **Repository**: <https://github.com/codershubinc/vscode-music>
+- **Issues & Support**: <https://github.com/codershubinc/vscode-music/issues>
+- **VS Code Marketplace**: [VS Music Extension](https://marketplace.visualstudio.com/items?itemName=codershubinc.music)
 
 ## 📈 Marketplace Information
 
 - **Extension Name**: VS Music
 - **Publisher**: codershubinc
-- **Version**: 0.1.2
+- **Version**: 0.1.4
 - **Category**: Other
 - **License**: MIT
 - **Engine**: VS Code ^1.103.0
