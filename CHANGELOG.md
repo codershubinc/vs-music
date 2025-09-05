@@ -92,12 +92,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Configure maximum title length
   - Toggle album art display
 - **Supported Music Players**:
-  - Spotify (official client)
+  - Spotify
   - VLC Media Player
   - Rhythmbox, Audacious, Clementine
   - Strawberry, Amarok, Banshee
   - Totem, mpv (with MPRIS script)
   - Browser-based players (Chrome/Firefox)
+  - Almost all type of media players
 - **Commands Available**:
   - `Music: Toggle Widget`
   - `Music: Toggle Corner Widget`

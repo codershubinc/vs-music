@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -40,6 +41,24 @@ const extensionConfig = {
       }
     ]
   },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/common/ui/webview/compactPlayer.html',
+          to: 'src/common/ui/webview/compactPlayer.html'
+        },
+        {
+          from: 'src/common/ui/webview/musicPlayer.css',
+          to: 'src/common/ui/webview/musicPlayer.css'
+        },
+        {
+          from: 'src/common/ui/webview/musicPlayer.js',
+          to: 'src/common/ui/webview/musicPlayer.js'
+        }
+      ]
+    })
+  ],
   devtool: 'nosources-source-map',
   infrastructureLogging: {
     level: "log", // enables logging required for problem matchers

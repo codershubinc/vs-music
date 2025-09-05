@@ -1,47 +1,88 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { MusicController } from './musicController';
+import { MusicWebviewProvider } from './common/ui/musicWebviewProvider';
+import { ArtworkUtil } from './linux/utils/artworkUtil';
 
-let musicController: MusicController | undefined;
+let webviewProvider: MusicWebviewProvider | undefined;
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
+export async function activate(context: vscode.ExtensionContext) {
 	console.log('VS Music extension is now active!');
 
+	ArtworkUtil.initialize(context);
+
 	try {
-		// Initialize the music controller
-		musicController = new MusicController(context);
+		webviewProvider = new MusicWebviewProvider(context);
 
-		// Add the controller to disposables so it gets cleaned up properly
-		context.subscriptions.push({
-			dispose: () => {
-				if (musicController) {
-					musicController.dispose();
-					musicController = undefined;
+		context.subscriptions.push(
+			vscode.window.registerWebviewViewProvider(
+				MusicWebviewProvider.viewType,
+				webviewProvider,
+				{
+					webviewOptions: {
+						retainContextWhenHidden: true
+					}
 				}
-			}
-		});
+			)
+		);
 
-		console.log('Music controller initialized successfully');
+		registerCommands(context);
 
-		// Show a welcome message
-		vscode.window.showInformationMessage('VS Music is ready! Music info will appear in the status bar when playing.');
+		console.log('VS Music extension initialized successfully');
+		vscode.window.showInformationMessage('VS Music is ready!');
 
 	} catch (error) {
-		console.error('Failed to initialize VS Music extension:', error);
-		vscode.window.showErrorMessage('Failed to initialize VS Music extension. Please check the console for details.');
+		console.error('Failed to initialize VS Music:', error);
+		vscode.window.showErrorMessage(`VS Music initialization failed: ${error}`);
 	}
 }
 
-// This method is called when your extension is deactivated
+function registerCommands(context: vscode.ExtensionContext): void {
+	const playPauseCommand = vscode.commands.registerCommand('vsMusic.playPause', async () => {
+		try {
+			if (webviewProvider) {
+				await webviewProvider.forceUpdate();
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to play/pause: ${error}`);
+		}
+	});
+
+	const nextTrackCommand = vscode.commands.registerCommand('vsMusic.nextTrack', async () => {
+		try {
+			if (webviewProvider) {
+				await webviewProvider.forceUpdate();
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to skip to next track: ${error}`);
+		}
+	});
+
+	const previousTrackCommand = vscode.commands.registerCommand('vsMusic.previousTrack', async () => {
+		try {
+			if (webviewProvider) {
+				await webviewProvider.forceUpdate();
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to go to previous track: ${error}`);
+		}
+	});
+
+	const showMusicPanelCommand = vscode.commands.registerCommand('vsMusic.showMusicPanel', () => {
+		webviewProvider?.show();
+	});
+
+	context.subscriptions.push(
+		playPauseCommand,
+		nextTrackCommand,
+		previousTrackCommand,
+		showMusicPanelCommand
+	);
+}
+
 export function deactivate() {
-	if (musicController) {
-		musicController.dispose();
-		musicController = undefined;
-	}
 	console.log('VS Music extension deactivated');
+
+	if (webviewProvider) {
+		webviewProvider.dispose();
+		webviewProvider = undefined;
+	}
 }
