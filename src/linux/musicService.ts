@@ -41,9 +41,7 @@ export class LinuxMusicService {
 
             playerctl.on('exit', (code) => {
                 this.isPlayerctlAvailable = code === 0;
-                if (this.isPlayerctlAvailable) {
-                    console.log('Linux Music Service: playerctl is available');
-                } else {
+                if (!this.isPlayerctlAvailable) {
                     console.warn('Linux Music Service: playerctl not available - music controls will be limited');
                 }
                 resolve();
@@ -129,11 +127,8 @@ export class LinuxMusicService {
                 if (code === 0 && output.trim()) {
                     try {
                         const cleanedOutput = output.trim();
-                        console.log('Raw playerctl output:', JSON.stringify(cleanedOutput));
 
-                        const parts = cleanedOutput.split(delimiter);
-
-                        if (parts.length >= 8) {
+                        const parts = cleanedOutput.split(delimiter); if (parts.length >= 8) {
                             const track: TrackInfo = {
                                 title: parts[0] || 'Unknown Title',
                                 artUrl: parts[1] || '',
@@ -144,7 +139,6 @@ export class LinuxMusicService {
                                 status: (parts[6]?.toLowerCase() as any) || 'stopped',
                                 player: parts[7] || 'Unknown Player'
                             };
-                            console.log('Parsed track info:', track);
                             resolve(track);
                         } else {
                             console.error('Unexpected playerctl output format. Expected 8 parts, got:', parts.length);

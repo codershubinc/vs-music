@@ -68,7 +68,6 @@
         // Only clear interval if it's a completely new track
         if (isNewTrack) {
             if (progressUpdateInterval) {
-                console.log('Clearing interval for new track');
                 clearInterval(progressUpdateInterval);
                 progressUpdateInterval = null;
             }
@@ -84,11 +83,9 @@
         if (!progressUpdateInterval || isNewTrack || (wasPlaying && !isPlaying)) {
             if (position !== undefined) {
                 currentTrack.position = position;
-                console.log(`Position updated from extension: ${position}s (reason: ${!progressUpdateInterval ? 'no timer' : isNewTrack ? 'new track' : 'stopped playing'})`);
             }
         } else {
             // Keep our manual position if timer is running
-            console.log(`Keeping manual position: ${currentTrack.position}s (extension sent: ${position}s)`);
         }
 
         const noMusicEl = document.getElementById('no-music');
@@ -166,11 +163,8 @@
             progressUpdateInterval = null;
         }
 
-        console.log(`startManualTimeUpdate called - track: ${currentTrack?.title}, status: ${currentTrack?.status}, duration: ${currentTrack?.duration}`);
-
         // Only start manual updates if playing and has duration
         if (currentTrack && (currentTrack.status === 'playing' || currentTrack.status === 'Playing') && currentTrack.duration > 0) {
-            console.log('Starting manual time update interval');
             progressUpdateInterval = setInterval(() => {
                 if (currentTrack && (currentTrack.status === 'playing' || currentTrack.status === 'Playing')) {
                     // Increment position by 1 second
@@ -181,26 +175,20 @@
                         currentTrack.position = currentTrack.duration;
                         clearInterval(progressUpdateInterval);
                         progressUpdateInterval = null;
-                        console.log('Manual timer stopped - reached end of track');
                         return;
                     }
 
                     // Store the updated position back to the track object
                     currentTrack.position = newPosition;
 
-                    console.log(`Manual Update - Position: ${newPosition}s / ${currentTrack.duration}s`);
-
                     // Update progress display
                     updateProgress(newPosition);
                 } else {
                     // Stop interval if not playing
-                    console.log(`Manual update stopped - status: ${currentTrack?.status}`);
                     clearInterval(progressUpdateInterval);
                     progressUpdateInterval = null;
                 }
             }, 1000);
-        } else {
-            console.log(`Not starting manual update - status: ${currentTrack?.status}, duration: ${currentTrack?.duration}`);
         }
     }
 
