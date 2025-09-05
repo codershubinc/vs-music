@@ -112,10 +112,12 @@ export class LinuxMusicService {
         }
 
         return new Promise((resolve, reject) => {
+            // Use a simpler delimiter-based approach that's more reliable
+            const delimiter = '|||';
             const playerctl = spawn('playerctl', [
                 'metadata',
                 '--format',
-                '{"title":"{{title}}","artUrl":"{{mpris:artUrl}}","artist":"{{artist}}","album":"{{album}}","position":"{{duration(position)}}","length":"{{duration(mpris:length)}}","status":"{{status}}","player":"{{playerName}}"}'
+                `{{title}}${delimiter}{{mpris:artUrl}}${delimiter}{{artist}}${delimiter}{{album}}${delimiter}{{duration(position)}}${delimiter}{{duration(mpris:length)}}${delimiter}{{status}}${delimiter}{{playerName}}`
             ]);
 
             let output = '';
@@ -126,20 +128,32 @@ export class LinuxMusicService {
             playerctl.on('close', (code) => {
                 if (code === 0 && output.trim()) {
                     try {
-                        const data = JSON.parse(output.trim());
-                        const track: TrackInfo = {
-                            title: data.title || 'Unknown Title',
-                            artUrl: data.artUrl || '',
-                            artist: data.artist || 'Unknown Artist',
-                            album: data.album || 'Unknown Album',
-                            position: this.parseDuration(data.position),
-                            duration: this.parseDuration(data.length),
-                            status: (data.status?.toLowerCase() as any) || 'stopped',
-                            player: data.player || 'Unknown Player'
-                        };
-                        resolve(track);
+                        const cleanedOutput = output.trim();
+                        console.log('Raw playerctl output:', JSON.stringify(cleanedOutput));
+
+                        const parts = cleanedOutput.split(delimiter);
+
+                        if (parts.length >= 8) {
+                            const track: TrackInfo = {
+                                title: parts[0] || 'Unknown Title',
+                                artUrl: parts[1] || '',
+                                artist: parts[2] || 'Unknown Artist',
+                                album: parts[3] || 'Unknown Album',
+                                position: this.parseDuration(parts[4]),
+                                duration: this.parseDuration(parts[5]),
+                                status: (parts[6]?.toLowerCase() as any) || 'stopped',
+                                player: parts[7] || 'Unknown Player'
+                            };
+                            console.log('Parsed track info:', track);
+                            resolve(track);
+                        } else {
+                            console.error('Unexpected playerctl output format. Expected 8 parts, got:', parts.length);
+                            console.error('Parts:', parts);
+                            resolve(null);
+                        }
                     } catch (error) {
-                        console.error('Failed to parse playerctl JSON output:', error);
+                        console.error('Failed to parse playerctl output:', error);
+                        console.error('Raw output was:', JSON.stringify(output));
                         resolve(null);
                     }
                 } else {
