@@ -4,6 +4,7 @@
 
     const vscode = acquireVsCodeApi();
     let currentTrack = null;
+    let progressUpdateInterval = null;
 
     // Message listener for extension communication
     window.addEventListener('message', event => {
@@ -60,7 +61,34 @@
             return;
         }
 
+        const isNewTrack = !currentTrack || currentTrack.title !== track.title || currentTrack.artist !== track.artist;
+        const statusChanged = !currentTrack || currentTrack.status !== track.status;
+
+        // Only clear interval if it's a completely new track
+        if (isNewTrack) {
+            if (progressUpdateInterval) {
+                console.log('Clearing interval for new track');
+                clearInterval(progressUpdateInterval);
+                progressUpdateInterval = null;
+            }
+        }
+
         currentTrack = track;
+
+        // Only update position from extension if:
+        // 1. We don't have a manual timer running AND it's playing, OR
+        // 2. Status changed (pause/play), OR  
+        // 3. It's a new track, OR
+        // 4. The track is not currently playing
+        if (!progressUpdateInterval || statusChanged || isNewTrack || track.status !== 'playing') {
+            if (position !== undefined) {
+                currentTrack.position = position;
+                console.log(`Position updated from extension: ${position}s`);
+            }
+        } else {
+            // Keep our manual position if timer is running and track is playing
+            console.log(`Keeping manual position: ${currentTrack.position}s (extension sent: ${position}s)`);
+        }
 
         const noMusicEl = document.getElementById('no-music');
         const musicInfoEl = document.getElementById('music-info');
@@ -79,8 +107,13 @@
         updateArtwork(artworkUri);
         updateStatusIndicator(track.status);
         updatePlayPauseButton(track.status);
-        updateProgress(position || track.position || 0);
+        updateProgress(currentTrack.position || 0);
         updateTime(track.duration || 0);
+
+        // Start manual time update only on status change or new track
+        if (statusChanged || isNewTrack) {
+            startManualTimeUpdate();
+        }
     }
 
     function updateElement(id, text) {
@@ -125,13 +158,59 @@
         }
     }
 
+    function startManualTimeUpdate() {
+        let manualUpdatedTime;
+        // Clear any existing interval
+        if (progressUpdateInterval) {
+            clearInterval(progressUpdateInterval);
+            progressUpdateInterval = null;
+        }
+
+        console.log(`startManualTimeUpdate called - track: ${currentTrack?.title}, status: ${currentTrack?.status}, duration: ${currentTrack?.duration}`);
+
+        // Only start manual updates if playing and has duration
+        if (currentTrack && (currentTrack.status === 'playing' || currentTrack.status === 'Playing') && currentTrack.duration > 0) {
+            console.log('Starting manual time update interval');
+            progressUpdateInterval = setInterval(() => {
+                if (currentTrack && (currentTrack.status === 'playing' || currentTrack.status === 'Playing')) {
+                    // Increment position by 1 second
+                    manualUpdatedTime = (currentTrack.position || 0) + 1;
+
+                    // Don't exceed duration
+                    if (manualUpdatedTime >= currentTrack.duration) {
+                        currentTrack.position = currentTrack.duration;
+                        clearInterval(progressUpdateInterval);
+                        progressUpdateInterval = null;
+                        console.log('Manual timer stopped - reached end of track');
+                        return;
+                    }
+
+                    // Store the updated position back to the track object
+                    currentTrack.position = manualUpdatedTime;
+
+                    console.log(`Manual Update - Position: ${manualUpdatedTime}s / ${currentTrack.duration}s`);
+
+                    // Update progress display
+                    updateProgress(manualUpdatedTime);
+                } else {
+                    // Stop interval if not playing
+                    console.log(`Manual update stopped - status: ${currentTrack?.status}`);
+                    clearInterval(progressUpdateInterval);
+                    progressUpdateInterval = null;
+                }
+            }, 1000);
+        } else {
+            console.log(`Not starting manual update - status: ${currentTrack?.status}, duration: ${currentTrack?.duration}`);
+        }
+    }
+
     function updatePlayPauseButton(status) {
         const playPauseBtn = document.getElementById('play-pause-btn');
         if (!playPauseBtn) {
             return;
         }
 
-        if (status === 'playing') {
+        if (status === 'playing' || status === 'Playing') {
             playPauseBtn.innerHTML = '⏸️';
             playPauseBtn.title = 'Pause';
         } else {
@@ -178,6 +257,12 @@
     }
 
     function showNoMusic() {
+        // Clear any running intervals
+        if (progressUpdateInterval) {
+            clearInterval(progressUpdateInterval);
+            progressUpdateInterval = null;
+        }
+
         const musicInfoEl = document.getElementById('music-info');
         const noMusicEl = document.getElementById('no-music');
 
