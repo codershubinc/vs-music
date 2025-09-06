@@ -1,3 +1,4 @@
+import { formatTime } from './helpers/timeFormat.js';
 function startManualTimeUpdate() {
     // Clear any existing interval
     if (progressUpdateInterval) {

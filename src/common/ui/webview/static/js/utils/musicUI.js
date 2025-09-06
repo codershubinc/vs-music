@@ -60,12 +60,21 @@ function showNoMusic() {
 
 function updateArtwork(artworkUri) {
     const albumArt = document.getElementById('album-art');
+    const musicContainer = document.getElementById('music-container');
     if (!albumArt) {
         return;
     }
 
     if (artworkUri && artworkUri !== '') {
         albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" onerror="this.parentElement.innerHTML='🎵'">`;
+        // if (musicContainer) {
+        //     musicContainer.style.backgroundImage = `url('${artworkUri}')`;
+        //     musicContainer.style.backgroundSize = 'cover';
+        //     musicContainer.style.backgroundPosition = 'center';
+        //     musicContainer.style.filter = 'blur(20px) brightness(0.5)';
+        //     musicContainer.style.opacity = '0.7';
+        //     musicContainer.style.zIndex = '-1';
+        // }
     } else {
         albumArt.innerHTML = '🎵';
     }

@@ -1,5 +1,6 @@
 import { showNoMusic, updateArtwork, updatePlayPauseButton, updateStatusIndicator } from './musicUI.js';
 import { startManualTimeUpdate, updateTime } from './timeUpdate.js';
+import { formatTime } from './helpers/timeFormat.js';
 
 // VS Music Player - Webview JavaScript
 ; (function () {
