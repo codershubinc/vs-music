@@ -1,17 +1,17 @@
 {
   "name": "music",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "codershubinc",
   "author": "Swapnil Ingle",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/codershubinc/vscode-music"
+    "url": "https://github.com/codershubinc/vs-music"
   },
   "bugs": {
-    "url": "https://github.com/codershubinc/vscode-music/issues"
+    "url": "https://github.com/codershubinc/vs-music/issues"
   },
-  "homepage": "https://github.com/codershubinc/vscode-music#readme",
+  "homepage": "https://github.com/codershubinc/vs-music#readme",
   "keywords": [
     "music",
     "player",
@@ -151,7 +151,7 @@
       }
     }
   },
-  "description": "Music player widget with status bar, controls & now playing info for Spotify, VLC, and other media players via MPRIS",
+  "description": "Stable Linux music player widget with status bar, controls & now playing info via MPRIS (Spotify, VLC, more)",
   "displayName": "VS Music",
   "icon": "ico.png",
   "engines": {

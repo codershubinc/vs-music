@@ -36,7 +36,7 @@ function updatePlayPauseButton(status) {
 }
 
 function showNoMusic() {
-    console.log("Showing no music UI");
+    // console.log("Showing no music UI");
 
     // Clear any running intervals
     if (progressUpdateInterval) {

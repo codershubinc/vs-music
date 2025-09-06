@@ -6,7 +6,7 @@ import { formatTime } from './helpers/timeFormat.js';
 ; (function () {
     'use strict';
 
-    console.log("Music Player Webview script loaded");
+    // console.log("Music Player Webview script loaded");
 
 
     const vscode = acquireVsCodeApi();
@@ -16,7 +16,7 @@ import { formatTime } from './helpers/timeFormat.js';
     // Message listener for extension communication
     window.addEventListener('message', event => {
         const message = event.data;
-        console.log("Received message:", message);
+        // console.log("Received message:", message);
 
         switch (message.command) {
             case 'updateTrack':
@@ -62,7 +62,7 @@ import { formatTime } from './helpers/timeFormat.js';
     }
 
     function updateTrack(track, artworkUri, position) {
-        console.log("Updating track:", track, "artworkUri:", artworkUri, "position:", position);
+        // console.log("Updating track:", track, "artworkUri:", artworkUri, "position:", position);
 
         if (!track || !track.title) {
             showNoMusic();
@@ -148,7 +148,7 @@ import { formatTime } from './helpers/timeFormat.js';
         }
 
         if (currentTimeElement) {
-            console.log('Updating current time to from updateProgress', currentPosition, "manual time:");
+            // console.log('Updating current time to from updateProgress', currentPosition, "manual time:");
 
             currentTimeElement.textContent = formatTime(currentPosition);
         }

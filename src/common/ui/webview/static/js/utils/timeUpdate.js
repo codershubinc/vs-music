@@ -39,6 +39,9 @@ function startManualTimeUpdate() {
 function updateTime(duration) {
     const totalTimeElement = document.getElementById('total-time');
     const progressContainer = document.getElementById('progress-container');
+    // remove the progressContainer entirely for now
+    return document.getElementById('progress-container')?.remove();
+    // hide progress bar until fixed
 
     if (totalTimeElement) {
         totalTimeElement.textContent = formatTime(duration);
