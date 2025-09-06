@@ -11,6 +11,8 @@ A Visual Studio Code extension that displays currently playing music information
 > **✅ STABLE LINUX RELEASE (v0.1.5)**: Core playback, artwork, and status integration are stable for Linux. Minor enhancements & cross‑platform support are upcoming.
 >
 > **🐧 LINUX ONLY**: Currently supports Linux systems only. Windows & macOS support coming soon.
+>
+> **🪟 WORKING ON WINDOWS SUPPORT**: The beta version for Windows is in progress. Will be released soon.
 
 ## 📸 Screenshots
 
