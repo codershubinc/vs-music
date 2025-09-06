@@ -5,6 +5,38 @@ All notable changes to the VS Music extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2025-09-06
+
+### Changed
+
+- Marked first **stable Linux release** (removed beta notice in docs)
+- Refined horizontal player layout with improved artwork, status indicator, progress bar & control styling
+- Converted webview scripts to **ES Modules** with clearer separation (logic vs UI vs coordinator)
+- Updated metadata & repository move from `vscode-music` to `vs-music`
+
+### Added
+
+- Robust selector alignment & fallback logic for webview elements
+- Manual progress/time update helper to smooth gaps between backend polling intervals
+- Additional CSS polish (text truncation, state color indicators, improved button states)
+
+### Fixed
+
+- Play/Pause state mismatch caused by inconsistent status casing
+- Missing / outdated selectors leading to unstyled or invisible elements
+- Packaging issues where HTML/CSS/JS assets were not always copied into `dist`
+- Potential duplicate timers by ensuring a single active manual progress interval
+
+### Internal / Maintenance
+
+- Cleaned up legacy aggregator script experiment (reverted to direct module imports)
+- Improved webpack copy patterns to keep distribution lean
+- Adjusted description to reflect stable Linux status
+
+### Notes
+
+- Windows & macOS support still planned; this release focuses on a polished Linux experience.
+
 ## [0.1.4] - 2025-09-01
 
 ### Added

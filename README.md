@@ -4,13 +4,13 @@
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux.svg)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Publisher](https://img.shields.io/badge/Publisher-codershubinc-orange.svg)
-![Version](https://img.shields.io/badge/Version-0.1.4%20beta-blue.svg)
+![Version](https://img.shields.io/badge/Version-0.1.5%20stable-blue.svg)
 
 A Visual Studio Code extension that displays currently playing music information and provides playback controls directly in your editor. Perfect for Linux developers who want to stay in their coding flow while managing their music.
 
-> **🚧 BETA VERSION NOTICE**: This extension is in active development. While functional, you may encounter minor bugs. We're continuously improving it!
+> **✅ STABLE LINUX RELEASE (v0.1.5)**: Core playback, artwork, and status integration are stable for Linux. Minor enhancements & cross‑platform support are upcoming.
 >
-> **⚠️ LINUX ONLY**: Currently supports Linux systems only. Windows & macOS support coming soon.
+> **🐧 LINUX ONLY**: Currently supports Linux systems only. Windows & macOS support coming soon.
 
 ## 📸 Screenshots
 
@@ -128,13 +128,13 @@ playerctl status
 
 2. **From VSIX file**:
 
-   - Download the `music-0.1.4.vsix` file from [releases](https://github.com/codershubinc/vscode-music/releases)
+   - Download the `music-0.1.5.vsix` file from [releases](https://github.com/codershubinc/vs-music/releases)
    - Open VS Code
    - Press Ctrl+Shift+P and type "Extensions: Install from VSIX"
    - Select the downloaded .vsix file
 
 3. **From GitHub**:
-   - Visit the [VS Music repository](https://github.com/codershubinc/vscode-music)
+   - Visit the [VS Music repository](https://github.com/codershubinc/vs-music)
    - Download the latest release
 
 ## 🚀 Usage
@@ -278,8 +278,8 @@ Contributions are welcome! This extension is specifically designed for Linux sys
 
 ### Development Setup
 
-1. Clone the repository: `git clone https://github.com/codershubinc/vscode-music.git`
-2. Navigate to music directory: `cd vscode-music/music`
+1. Clone the repository: `git clone https://github.com/codershubinc/vs-music.git`
+2. Navigate to music directory: `cd vs-music/music`
 3. Install dependencies: `bun install`
 4. Open in VS Code
 5. Press F5 to launch Extension Development Host
@@ -312,15 +312,15 @@ bun run build-vsix
 
 ### 📬 Project Links
 
-- **Repository**: <https://github.com/codershubinc/vscode-music>
-- **Issues & Support**: <https://github.com/codershubinc/vscode-music/issues>
+- **Repository**: <https://github.com/codershubinc/vs-music>
+- **Issues & Support**: <https://github.com/codershubinc/vs-music/issues>
 - **VS Code Marketplace**: [VS Music Extension](https://marketplace.visualstudio.com/items?itemName=codershubinc.music)
 
 ## 📈 Marketplace Information
 
 - **Extension Name**: VS Music
 - **Publisher**: codershubinc
-- **Version**: 0.1.4
+- **Version**: 0.1.5
 - **Category**: Other
 - **License**: MIT
 - **Engine**: VS Code ^1.103.0
