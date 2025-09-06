@@ -1,5 +1,5 @@
 import { showNoMusic, updateArtwork, updatePlayPauseButton, updateStatusIndicator } from './musicUI.js';
-import { updateProgress, updateTime } from './timeUpdate.js';
+import { toggleProgressBar, updateProgress, updateTime } from './timeUpdate.js';
 
 // VS Music Player - Webview JavaScript
 ; (function () {
@@ -20,7 +20,7 @@ import { updateProgress, updateTime } from './timeUpdate.js';
 
         switch (message.command) {
             case 'updateTrack':
-                updateTrack(message.track, message.artworkUri, message.position);
+                updateTrack(message.track, message.artworkUri, message.position, message.showProgressBar);
                 break;
 
         }
@@ -61,12 +61,20 @@ import { updateProgress, updateTime } from './timeUpdate.js';
         }
     }
 
-    function updateTrack(track, artworkUri, position) {
+    function updateTrack(track, artworkUri, position, showProgressBar = false) {
         // console.log("Updating track:", track, "artworkUri:", artworkUri, "position:", position);
 
         if (!track || !track.title) {
             showNoMusic();
             return;
+        }
+        const progressContainer = document.getElementById('progress-container');
+        if (progressContainer) {
+            if (showProgressBar && track && track.duration > 0) {
+                progressContainer.style.display = 'block';
+            } else {
+                progressContainer.style.display = 'none';
+            }
         }
 
         const isNewTrack = !currentTrack || currentTrack.title !== track.title || currentTrack.artist !== track.artist;
@@ -118,11 +126,20 @@ import { updateProgress, updateTime } from './timeUpdate.js';
         updateStatusIndicator(track.status);
         updatePlayPauseButton(track.status);
         updateTime(track.duration || 0);
+        toggleProgressBar(showProgressBar && track && track.duration > 0);
 
         // Start manual time update only on status change or new track
         if (statusChanged || isNewTrack) {
-            currentPosition = track.position || 0;
-            startManualTimeUpdate();
+            if (showProgressBar) {
+                currentPosition = track.position || 0;
+                startManualTimeUpdate();
+            } else {
+                // Clear any existing timer if progress bar is disabled
+                if (progressUpdateInterval) {
+                    clearInterval(progressUpdateInterval);
+                    progressUpdateInterval = null;
+                }
+            }
         }
     }
 

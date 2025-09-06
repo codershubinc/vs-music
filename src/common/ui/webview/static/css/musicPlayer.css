@@ -152,6 +152,12 @@ body {
     margin: 10px 0;
     width: 100%;
     overflow: hidden;
+    transition: opacity 0.2s ease-in-out;
+}
+
+#progress-container[aria-hidden="true"] {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #progress-bar {

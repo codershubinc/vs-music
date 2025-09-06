@@ -371,7 +371,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                 command: 'updateTrack',           // Message type
                 track: trackInfo,                 // Full track object
                 artworkUri: artworkUri,           // Processed artwork URI
-                position: currentPosition || 0    // Playback position in seconds
+                position: currentPosition || 0,    // Playback position in seconds
+                showProgressBar: this.getShowProgressBar()  // User setting for progress bar visibility
             });
 
             // Log successful update (helpful for debugging)
@@ -499,6 +500,11 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                 </html>
             `;
         }
+    }
+    // Add this method to get the setting
+    private getShowProgressBar(): boolean {
+        const config = vscode.workspace.getConfiguration('music');
+        return config.get<boolean>('showProgressBar', true);
     }
 
     /**

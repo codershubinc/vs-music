@@ -147,6 +147,11 @@
           "type": "number",
           "default": 30,
           "description": "Maximum length of song title in status bar"
+        },
+        "music.showProgressBar": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show progress bar in music panel"
         }
       }
     }
