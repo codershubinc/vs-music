@@ -228,6 +228,59 @@ body {
     background: var(--vscode-button-hoverBackground, #0086E6);
 }
 
+/* Ensure music info container gets layout */
+.music-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Artwork block */
+.artwork-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--vscode-editor-background, #222);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--vscode-widget-border, #333);
+}
+
+.artwork-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Time labels */
+.current-time,
+.total-time {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground, #aaa);
+}
+
+/* Status icon refinement */
+.status-icon {
+    font-size: 14px;
+    display: inline-block;
+}
+
+/* If keeping both classes, unify no-music-container appearance */
+.no-music-container {
+    text-align: center;
+    color: var(--vscode-descriptionForeground, #888);
+    font-size: 14px;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
 /* Utility classes */
 .hidden {
     display: none !important;
