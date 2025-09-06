@@ -23,6 +23,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
     overflow: hidden;
+    position: relative;
 }
 
 .music-icon {
@@ -147,13 +148,13 @@ body {
     color: white;
 }
 
-.progress-container {
+#progress-container {
     margin: 10px 0;
     width: 100%;
     overflow: hidden;
 }
 
-.progress-bar {
+#progress-bar {
     width: 100%;
     height: 4px;
     background: var(--vscode-input-background, #333333);
@@ -163,7 +164,7 @@ body {
     cursor: pointer;
 }
 
-.progress-fill {
+#progress-fill {
     height: 100%;
     background: var(--vscode-button-background, #007ACC);
     border-radius: 2px;
@@ -502,16 +503,30 @@ body {
 .music-container {
     backdrop-filter: blur(3px) saturate(1.2);
     z-index: 1;
+    position: relative;
 }
 
 /* Reduce scrollbar chance in narrow side bar */
 body,
 .music-container {
     scrollbar-width: none;
+    position: relative;
 }
 
 body::-webkit-scrollbar {
     display: none;
+}
+
+/* utility classes */
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    border-radius: 10px;
+    transition: opacity 0.3s ease;
 }
 
 /* End overrides */

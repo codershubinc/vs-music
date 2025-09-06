@@ -1,6 +1,5 @@
 import { showNoMusic, updateArtwork, updatePlayPauseButton, updateStatusIndicator } from './musicUI.js';
-import { startManualTimeUpdate, updateTime } from './timeUpdate.js';
-import { formatTime } from './helpers/timeFormat.js';
+import { updateProgress, updateTime } from './timeUpdate.js';
 
 // VS Music Player - Webview JavaScript
 ; (function () {
@@ -12,6 +11,7 @@ import { formatTime } from './helpers/timeFormat.js';
     const vscode = acquireVsCodeApi();
     let currentTrack = null;
     let progressUpdateInterval = null;
+    let currentPosition = null;
 
     // Message listener for extension communication
     window.addEventListener('message', event => {
@@ -75,12 +75,15 @@ import { formatTime } from './helpers/timeFormat.js';
         // Only clear interval if it's a completely new track
         if (isNewTrack) {
             if (progressUpdateInterval) {
+                // console.log("Clearing progress update interval for new track");
                 clearInterval(progressUpdateInterval);
                 progressUpdateInterval = null;
             }
         }
 
         currentTrack = track;
+        // console.log("Current track set to:", currentTrack, "From", track);
+
 
         // Only update position from extension if we don't have manual timer running
         // OR if it's a new track OR if status changed to non-playing state
@@ -89,7 +92,9 @@ import { formatTime } from './helpers/timeFormat.js';
 
         if (!progressUpdateInterval || isNewTrack || (wasPlaying && !isPlaying)) {
             if (position !== undefined) {
-                currentTrack.position = position;
+                // console.log('Updating position from extension:', position);
+
+                currentPosition = position;
             }
         } else {
             // Keep our manual position if timer is running
@@ -112,11 +117,11 @@ import { formatTime } from './helpers/timeFormat.js';
         updateArtwork(artworkUri);
         updateStatusIndicator(track.status);
         updatePlayPauseButton(track.status);
-        updateProgress(currentTrack.position || 0);
         updateTime(track.duration || 0);
 
         // Start manual time update only on status change or new track
         if (statusChanged || isNewTrack) {
+            currentPosition = track.position || 0;
             startManualTimeUpdate();
         }
     }
@@ -127,36 +132,6 @@ import { formatTime } from './helpers/timeFormat.js';
             element.textContent = text;
         }
     }
-
-
-
-
-
-
-
-    function updateProgress(currentPosition) {
-        if (!currentTrack) {
-            return;
-        }
-        const duration = currentTrack.duration || 0;
-        const progressFill = document.getElementById('progress-fill');
-        const currentTimeElement = document.getElementById('current-time');
-
-        if (progressFill && duration > 0) {
-            const percentage = Math.min((currentPosition / duration) * 100, 100);
-            progressFill.style.width = `${percentage}%`;
-        }
-
-        if (currentTimeElement) {
-            // console.log('Updating current time to from updateProgress', currentPosition, "manual time:");
-
-            currentTimeElement.textContent = formatTime(currentPosition);
-        }
-    }
-
-
-
-
     // Progress bar click handler for seeking (future feature)
     function handleProgressClick(event) {
         if (!currentTrack || !currentTrack.duration) {
@@ -171,6 +146,44 @@ import { formatTime } from './helpers/timeFormat.js';
 
         // TODO: Implement seeking functionality
         // vscode.postMessage({ command: 'seek', position: newPosition });
+    }
+
+    // ManualTimeUpdate func
+    function startManualTimeUpdate() {
+        if (progressUpdateInterval) {
+            clearInterval(progressUpdateInterval);
+            progressUpdateInterval = null;
+        }
+
+        if (!currentTrack || (currentTrack.status !== 'playing' && currentTrack.status !== 'Playing')) {
+            return;
+        }
+
+        progressUpdateInterval = setInterval(() => {
+            // console.log('Manual time update tick for track:', currentTrack);
+
+            if (!currentTrack || (currentTrack.status !== 'playing' && currentTrack.status !== 'Playing')) {
+                clearInterval(progressUpdateInterval);
+                progressUpdateInterval = null;
+                return;
+            }
+
+            let updatedPosition = (currentPosition) + 1;
+
+            if (updatedPosition >= currentTrack.duration) {
+                currentTrack.position = currentTrack.duration;
+                clearInterval(progressUpdateInterval);
+                progressUpdateInterval = null;
+                return;
+            }
+
+            currentPosition = updatedPosition; // ← Add this line
+            // console.log("Updated position:", updatedPosition, "for track:", currentTrack.title);
+
+            updateProgress(updatedPosition, currentTrack);
+
+        }, 1000);
+
     }
 
 

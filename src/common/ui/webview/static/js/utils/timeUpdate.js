@@ -1,65 +1,105 @@
 import { formatTime } from './helpers/timeFormat.js';
-function startManualTimeUpdate() {
-    // Clear any existing interval
-    if (progressUpdateInterval) {
-        clearInterval(progressUpdateInterval);
-        progressUpdateInterval = null;
-    }
 
-    // Only start manual updates if playing and has duration
-    if (currentTrack && (currentTrack.status === 'playing' || currentTrack.status === 'Playing') && currentTrack.duration > 0) {
-        progressUpdateInterval = setInterval(() => {
-            if (currentTrack && (currentTrack.status === 'playing' || currentTrack.status === 'Playing')) {
-                // Increment position by 1 second
-                const newPosition = (currentTrack.position || 0) + 1;
-
-                // Don't exceed duration
-                if (newPosition >= currentTrack.duration) {
-                    currentTrack.position = currentTrack.duration;
-                    clearInterval(progressUpdateInterval);
-                    progressUpdateInterval = null;
-                    return;
-                }
-
-                // Store the updated position back to the track object
-                currentTrack.position = newPosition;
-
-                // Update progress display
-                updateProgress(newPosition);
-            } else {
-                // Stop interval if not playing
-                clearInterval(progressUpdateInterval);
-                progressUpdateInterval = null;
-            }
-        }, 1000);
-    }
-}
-
-
+/**
+ * Updates the total duration display and shows/hides progress container
+ * Called once when track loads or changes
+ */
 function updateTime(duration) {
     const totalTimeElement = document.getElementById('total-time');
     const progressContainer = document.getElementById('progress-container');
-    // remove the progressContainer entirely for now
-    return document.getElementById('progress-container')?.remove();
-    // hide progress bar until fixed
 
+    // Update total duration display
     if (totalTimeElement) {
-        totalTimeElement.textContent = formatTime(duration);
+        totalTimeElement.textContent = formatTime(duration || 0);
     }
 
-    // Show/hide progress container based on whether we have duration
+    // Show progress UI only if we have a valid duration
     if (progressContainer) {
         if (duration && duration > 0) {
             progressContainer.style.display = 'block';
+            progressContainer.setAttribute('aria-hidden', 'false');
         } else {
             progressContainer.style.display = 'none';
+            progressContainer.setAttribute('aria-hidden', 'true');
         }
     }
 }
 
+/**
+ * Updates the progress bar and current time display
+ * Called repeatedly during playback (every second)
+ */
+function updateProgress(currentPosition, currentTrack) {
+    // Early return if no track data
+    if (!currentTrack) {
+        console.warn('updateProgress: No current track provided');
+        return;
+    }
 
+    // Validate position - allow 0 but not null/undefined
+    if (currentPosition === null || currentPosition === undefined) {
+        console.warn('updateProgress: Invalid position provided');
+        return;
+    }
+
+    const duration = currentTrack.duration || 0;
+    const progressFill = document.getElementById('progress-fill');
+    const currentTimeElement = document.getElementById('current-time');
+
+    // Update progress bar visual
+    if (progressFill) {
+        if (duration > 0) {
+            // Calculate percentage with bounds checking
+            const percentage = Math.max(0, Math.min((currentPosition / duration) * 100, 100));
+            progressFill.style.width = `${percentage}%`;
+
+            // Add aria attributes for accessibility
+            const progressBar = progressFill.parentElement;
+            if (progressBar) {
+                progressBar.setAttribute('aria-valuenow', Math.round(percentage));
+                progressBar.setAttribute('aria-valuetext', `${formatTime(currentPosition)} of ${formatTime(duration)}`);
+            }
+        } else {
+            // No duration - hide progress
+            progressFill.style.width = '0%';
+        }
+    }
+
+    // Update current time display
+    if (currentTimeElement) {
+        currentTimeElement.textContent = formatTime(currentPosition);
+
+        // Add title attribute for better UX
+        currentTimeElement.title = `Current position: ${formatTime(currentPosition)}`;
+    }
+}
+
+/**
+ * Resets progress UI to initial state
+ * Useful when no music is playing or track ends
+ */
+function resetProgress() {
+    const progressFill = document.getElementById('progress-fill');
+    const currentTimeElement = document.getElementById('current-time');
+    const progressContainer = document.getElementById('progress-container');
+
+    if (progressFill) {
+        progressFill.style.width = '0%';
+    }
+
+    if (currentTimeElement) {
+        currentTimeElement.textContent = '0:00';
+        currentTimeElement.title = '';
+    }
+
+    if (progressContainer) {
+        progressContainer.style.display = 'none';
+        progressContainer.setAttribute('aria-hidden', 'true');
+    }
+}
 
 export {
-    startManualTimeUpdate,
-    updateTime
+    updateTime,
+    updateProgress,
+    resetProgress
 };

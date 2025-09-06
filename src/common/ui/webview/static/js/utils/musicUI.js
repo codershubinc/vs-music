@@ -57,29 +57,55 @@ function showNoMusic() {
     currentTrack = null;
 }
 
-
 function updateArtwork(artworkUri) {
     const albumArt = document.getElementById('album-art');
-    const musicContainer = document.getElementById('music-container');
+    const musicContainer = document.querySelector('.music-container'); // Use class instead of ID
+
     if (!albumArt) {
         return;
     }
 
     if (artworkUri && artworkUri !== '') {
+        // Update the album art container
         albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" onerror="this.parentElement.innerHTML='🎵'">`;
-        // if (musicContainer) {
-        //     musicContainer.style.backgroundImage = `url('${artworkUri}')`;
-        //     musicContainer.style.backgroundSize = 'cover';
-        //     musicContainer.style.backgroundPosition = 'center';
-        //     musicContainer.style.filter = 'blur(20px) brightness(0.5)';
-        //     musicContainer.style.opacity = '0.7';
-        //     musicContainer.style.zIndex = '-1';
-        // }
+
+        // Add blurred background to the main container
+        if (musicContainer) {
+            musicContainer.style.position = 'relative';
+
+            // Create or update background overlay
+            let backgroundOverlay = musicContainer.querySelector('.background-overlay');
+            if (!backgroundOverlay) {
+                backgroundOverlay = document.createElement('div');
+                backgroundOverlay.className = 'background-overlay';
+                musicContainer.insertBefore(backgroundOverlay, musicContainer.firstChild);
+            }
+
+            backgroundOverlay.style.position = 'absolute';
+            backgroundOverlay.style.top = '0';
+            backgroundOverlay.style.left = '0';
+            backgroundOverlay.style.width = '100%';
+            backgroundOverlay.style.height = '100%';
+            backgroundOverlay.style.backgroundImage = `url('${artworkUri}')`;
+            backgroundOverlay.style.backgroundSize = 'cover';
+            backgroundOverlay.style.backgroundPosition = 'center';
+            backgroundOverlay.style.filter = 'blur(20px) brightness(0.3)';
+            backgroundOverlay.style.opacity = '0.6';
+            backgroundOverlay.style.zIndex = '-1';
+            backgroundOverlay.style.borderRadius = '10px';
+        }
     } else {
+        // No artwork - reset to default
         albumArt.innerHTML = '🎵';
+
+        if (musicContainer) {
+            const backgroundOverlay = musicContainer.querySelector('.background-overlay');
+            if (backgroundOverlay) {
+                backgroundOverlay.remove();
+            }
+        }
     }
 }
-
 
 export {
     updateStatusIndicator,
