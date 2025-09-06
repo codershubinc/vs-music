@@ -1,0 +1,517 @@
+/* VS Code Music Player - Enhanced UI Styles */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 14px;
+    color: var(--vscode-foreground, #ffffff);
+    background-color: var(--vscode-editor-background, #000000);
+    margin: 0;
+    padding: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+    height: auto;
+    min-height: 0;
+}
+
+.music-container {
+    width: 100%;
+    margin: 0;
+    background: var(--vscode-sideBar-background, #111111);
+    border: 1px solid var(--vscode-widget-border, #333333);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.music-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    margin-right: 16px;
+    background: var(--vscode-input-background, #222222);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--vscode-descriptionForeground, #888888);
+    border: 1px solid var(--vscode-widget-border, #333333);
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.music-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.no-music {
+    text-align: center;
+    color: var(--vscode-descriptionForeground, #888888);
+    font-size: 14px;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.no-music-icon {
+    font-size: 32px;
+    opacity: 0.6;
+}
+
+.track-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.track-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    padding-right: 8px;
+}
+
+.track-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--vscode-foreground, #ffffff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.track-artist {
+    font-size: 15px;
+    color: var(--vscode-descriptionForeground, #bbbbbb);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    font-weight: 500;
+}
+
+.track-album {
+    font-size: 13px;
+    color: var(--vscode-descriptionForeground, #888888);
+    font-style: italic;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-left: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.status-playing {
+    background: #4CAF50;
+    color: white;
+}
+
+.status-paused {
+    background: #FF9800;
+    color: white;
+}
+
+.status-stopped {
+    background: #F44336;
+    color: white;
+}
+
+.progress-container {
+    margin: 10px 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--vscode-input-background, #333333);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--vscode-button-background, #007ACC);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-time {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground, #bbbbbb);
+    font-weight: 500;
+    width: 100%;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.control-btn {
+    background: var(--vscode-input-background, #333333);
+    border: 1px solid var(--vscode-widget-border, #555555);
+    color: var(--vscode-foreground, #ffffff);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background: var(--vscode-list-hoverBackground, #444444);
+    transform: translateY(-1px);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+.control-btn.play-pause {
+    font-size: 18px;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background: var(--vscode-button-background, #007ACC);
+    color: var(--vscode-button-foreground, #ffffff);
+}
+
+.control-btn.play-pause:hover {
+    background: var(--vscode-button-hoverBackground, #0086E6);
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+/* --- Overrides & Missing Selectors Added (synchronized with musicPlayer.html) --- */
+/* Container shown when a track is playing */
+.music-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1;
+}
+
+/* Unified no-music container styling (HTML uses class no-music-container) */
+.no-music-container {
+    text-align: center;
+    color: var(--vscode-descriptionForeground, #888888);
+    font-size: 14px;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Artwork block (current HTML nested div#album-art > .artwork-placeholder) */
+#album-art,
+.artwork-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--vscode-input-background, #222222);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--vscode-widget-border, #333333);
+}
+
+.artwork-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--vscode-descriptionForeground, #888888);
+}
+
+/* Status icon span inside status-indicator */
+.status-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* Time labels (current & total) */
+#current-time,
+#total-time,
+.current-time,
+.total-time {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground, #bbbbbb);
+}
+
+/* Ensure progress-bar is clickable even if id was added dynamically */
+#progress-bar.progress-bar,
+.progress-bar#progress-bar {
+    cursor: pointer;
+}
+
+/* Play/pause outer button wrapper (HTML uses #play-pause-button containing span#play-pause-btn) */
+#play-pause-button {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Inner span icon size */
+#play-pause-btn {
+    font-size: 18px;
+    display: inline-block;
+}
+
+/* Provide graceful fallback if artwork image gets injected */
+#album-art img,
+.artwork-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Slight spacing tweak for track-details to prevent hugging artwork */
+.track-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* === Layout Refresh (match updated visual spec) === */
+/* Horizontal track layout */
+.track-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 2px 2px 2px;
+}
+
+/* Album art wrapper (supports div#album-art or legacy .music-icon) */
+#album-art,
+.music-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    background: var(--vscode-input-background, #222);
+    border: 1px solid var(--vscode-widget-border, #333);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
+}
+
+#album-art .artwork-placeholder {
+    font-size: 30px;
+    line-height: 1;
+}
+
+/* Track text container refinements */
+.track-details {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+#track-title,
+.track-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#track-artist,
+.track-artist {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--vscode-descriptionForeground, #bdbdbd);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#track-album,
+.track-album {
+    font-size: 11px;
+    font-style: italic;
+    opacity: .75;
+    color: var(--vscode-descriptionForeground, #9a9a9a);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Status indicator now uses an id in HTML */
+#status-indicator,
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    background: var(--vscode-input-background, #333);
+    border: 1px solid var(--vscode-widget-border, #444);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+}
+
+/* Reapply state colors for id-based element */
+#status-indicator.status-playing {
+    background: #4CAF50;
+    color: #fff;
+}
+
+#status-indicator.status-paused {
+    background: #FF9800;
+    color: #fff;
+}
+
+#status-indicator.status-stopped {
+    background: #F44336;
+    color: #fff;
+}
+
+/* Progress container spacing harmonised */
+.progress-container {
+    margin: 6px 0 2px 0;
+}
+
+.progress-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(80, 80, 80, .55), rgba(60, 60, 60, .55));
+    position: relative;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, var(--vscode-button-background, #007ACC), #20a4ff);
+    box-shadow: 0 0 4px rgba(0, 160, 255, .6);
+}
+
+.progress-time {
+    font-size: 10px;
+    letter-spacing: .5px;
+    margin-top: 4px;
+}
+
+/* Controls layout refinement */
+.controls {
+    margin-top: 4px;
+    gap: 10px;
+}
+
+.control-btn.play-pause-btn,
+#play-pause-button {
+    background: var(--vscode-button-background, #007ACC);
+    border: 1px solid var(--vscode-button-border, #0069b8);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
+}
+
+#play-pause-button:hover {
+    background: var(--vscode-button-hoverBackground, #0a84d6);
+}
+
+#play-pause-btn {
+    font-size: 20px;
+}
+
+.control-btn {
+    transition: background .15s ease, transform .15s ease;
+}
+
+.control-btn:active {
+    transform: scale(.92);
+}
+
+/* No-music state unify (uses only .no-music-container in HTML) */
+#no-music.no-music-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Slight polish for container */
+.music-container {
+    backdrop-filter: blur(3px) saturate(1.2);
+    z-index: 1;
+}
+
+/* Reduce scrollbar chance in narrow side bar */
+body,
+.music-container {
+    scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* End overrides */
