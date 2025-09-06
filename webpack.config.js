@@ -44,17 +44,23 @@ const extensionConfig = {
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
+        // Copy whole CSS folder and keep folder structure under dist/src/common/ui/webview/static/css/
         {
-          from: 'src/common/ui/webview/compactPlayer.html',
-          to: 'src/common/ui/webview/compactPlayer.html'
+          from: 'src/common/ui/webview/static/css/**/*',
+          to: '[path][name][ext]',
+          noErrorOnMissing: true
+        },
+
+        // Copy all JS files under utils/ recursively and preserve subfolders (helpers/, etc.)
+        {
+          from: 'src/common/ui/webview/static/js/utils/**/*',
+          to: '[path][name][ext]',
+          noErrorOnMissing: true
         },
         {
-          from: 'src/common/ui/webview/musicPlayer.css',
-          to: 'src/common/ui/webview/musicPlayer.css'
-        },
-        {
-          from: 'src/common/ui/webview/musicPlayer.js',
-          to: 'src/common/ui/webview/musicPlayer.js'
+          from: 'src/common/ui/webview/musicPlayer.html',
+          to: 'src/common/ui/webview/musicPlayer.html',
+          noErrorOnMissing: true
         }
       ]
     })

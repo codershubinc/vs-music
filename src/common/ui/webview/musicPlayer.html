@@ -27,21 +27,21 @@
         <div id="music-info" class="music-info hidden">
             <div class="track-container">
                 <div class="artwork-container">
-                    <div class="artwork-placeholder">🎵</div>
+                    <img id="album-art" class="artwork-image" src="" alt="Album Art" />
                 </div>
                 <div class="track-details">
                     <div class="status-indicator">
                         <span class="status-icon">▶️</span>
                     </div>
-                    <div class="track-title">Loading...</div>
-                    <div class="track-artist">Please wait...</div>
-                    <div class="track-album">Initializing...</div>
+                    <div id="track-title">Loading...</div>
+                    <div id="track-artist">Please wait...</div>
+                    <div id="track-album">Initializing...</div>
                 </div>
             </div>
 
             <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
                 </div>
                 <div class="progress-time">
                     <span class="current-time">0:00</span>
@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <script src="{{jsUri}}"></script>
+    <script type="module" src="{{jsUri}}"></script>
 </body>
 
 </html>

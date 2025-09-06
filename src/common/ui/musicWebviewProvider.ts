@@ -419,9 +419,13 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
              * Build paths to HTML, CSS, and JS files for both packaged and development modes
              */
             // Try packaged extension paths first (dist/ directory)
-            let htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'compactPlayer.html');
-            let cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'musicPlayer.css');
-            let jsPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'musicPlayer.js');
+            let htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'musicPlayer.html');
+            let cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'static', 'css', 'musicPlayer.css');
+            let jsPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'static', 'js', 'utils', 'musicPlayer.js');
+
+            console.log('📁 Checking for HTML file at:', htmlPath);
+            console.log('📁 Checking for CSS file at:', cssPath);
+            console.log('📁 Checking for JS file at:', jsPath);
 
             if (!fs.existsSync(htmlPath)) {
                 /**
@@ -431,7 +435,7 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                  * Load files directly from src/ directory.
                  */
                 console.log('📁 Dist files not found, using development paths');
-                htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'compactPlayer.html');
+                htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.html');
                 cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.css');
                 jsPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.js');
             }
@@ -460,8 +464,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
              * Before: <link rel="stylesheet" href="musicPlayer.css">
              * After:  <link rel="stylesheet" href="vscode-webview-resource://...">
              */
-            htmlContent = htmlContent.replace('href="musicPlayer.css"', `href="${cssUri}"`);
-            htmlContent = htmlContent.replace('src="musicPlayer.js"', `src="${jsUri}"`);
+            htmlContent = htmlContent.replace(/\{\{\s*cssUri\s*\}\}/g, cssUri ? cssUri.toString() : '');
+            htmlContent = htmlContent.replace(/\{\{\s*jsUri\s*\}\}/g, jsUri ? jsUri.toString() : '');
 
             console.log('✅ Successfully loaded and processed HTML content');
             return htmlContent;
