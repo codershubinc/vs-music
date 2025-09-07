@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src vscode-resource: 'unsafe-inline'; script-src vscode-resource: 'unsafe-inline'; img-src vscode-resource: data:;">
+    <title>VS Music Player</title>
+    <link rel="stylesheet" href="{{cssUri}}">
+</head>
+
+<body>
+    <div class="music-container">
+        <div id="no-music" class="no-music-container">
+            <div class="music-icon">🎵</div>
+            <h2>No music currently playing</h2>
+            <p>Start playing music from any MPRIS-compatible player</p>
+            <div class="supported-players">
+                <span>Spotify</span>
+                <span>VLC</span>
+                <span>Rhythmbox</span>
+                <span>Chrome</span>
+            </div>
+        </div>
+
+        <div id="music-info" class="music-info hidden">
+            <div class="track-container">
+                <div id="album-art">
+                    <div class="artwork-placeholder">🎵</div>
+                </div>
+                <div class="track-details">
+                    <div id="status-indicator" class="status-indicator">
+                        <span class="status-icon">▶️</span>
+                    </div>
+                    <div id="track-title">Loading...</div>
+                    <div id="track-artist">Please wait...</div>
+                    <div id="track-album">Initializing...</div>
+                </div>
+            </div>
+            <!-- Currently removing the progress bar until fixed -->
+
+            <div id="progress-container">
+                <div id="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+                <div class="progress-time">
+                    <span id="current-time">0:00</span>
+                    <span id="total-time">0:00</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="prev-btn" title="Previous">⏮️</button>
+                <button class="control-btn play-pause-btn" id="play-pause-btn" title="Play/Pause">▶️</button>
+                <button class="control-btn" id="next-btn" title="Next">⏭️</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="{{jsUri}}"></script>
+</body>
+
+</html>
