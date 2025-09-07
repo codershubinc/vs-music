@@ -107,9 +107,29 @@ function updateArtwork(artworkUri) {
     }
 }
 
+// Add loading state functions
+function showLoadingState() {
+    const container = document.querySelector('.music-container');
+    container?.classList.add('loading');
+
+    // Add skeleton animation
+    const trackTitle = document.getElementById('track-title');
+    const trackArtist = document.getElementById('track-artist');
+
+    if (trackTitle) { trackTitle.innerHTML = '<div class="skeleton-text"></div>'; }
+    if (trackArtist) { trackArtist.innerHTML = '<div class="skeleton-text short"></div>'; }
+}
+
+function hideLoadingState() {
+    const container = document.querySelector('.music-container');
+    container?.classList.remove('loading');
+}
+
 export {
     updateStatusIndicator,
     updatePlayPauseButton,
     showNoMusic,
     updateArtwork,
+    showLoadingState,
+    hideLoadingState,
 };
