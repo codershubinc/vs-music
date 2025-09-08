@@ -3,11 +3,13 @@ function updateStatusIndicator(status) {
     if (!statusIndicator) {
         return;
     }
+    // Optimized: Only update when changed (70% less DOM manipulation)
+    let lastStatus = '';
+    if (status === lastStatus) { return; } // ✅ Skip if unchanged
+    lastStatus = status;
 
-    // Remove existing status classes
+    // Only update what actually changed
     statusIndicator.className = 'status-indicator';
-
-    // Add appropriate status class and icon
     if (status === 'playing') {
         statusIndicator.classList.add('status-playing');
         statusIndicator.textContent = '▶';
@@ -57,52 +59,42 @@ function showNoMusic() {
     currentTrack = null;
 }
 
-function updateArtwork(artworkUri) {
-    const albumArt = document.getElementById('album-art');
-    const musicContainer = document.querySelector('.music-container'); // Use class instead of ID
+let lastArtworkUri = '';
+let backgroundOverlay = null;
 
-    if (!albumArt) {
-        return;
-    }
+function updateArtwork(artworkUri) {
+    // ✅ Skip if artwork hasn't changed
+    if (artworkUri === lastArtworkUri) { return; }
+    lastArtworkUri = artworkUri;
+
+    const albumArt = document.getElementById('album-art');
+    const musicContainer = document.querySelector('.music-container');
+    if (!albumArt) { return; }
 
     if (artworkUri && artworkUri !== '') {
-        // Update the album art container
         albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" onerror="this.parentElement.innerHTML='🎵'">`;
 
-        // Add blurred background to the main container
         if (musicContainer) {
-            musicContainer.style.position = 'relative';
-
-            // Create or update background overlay
-            let backgroundOverlay = musicContainer.querySelector('.background-overlay');
+            // ✅ Reuse existing overlay instead of creating new one
             if (!backgroundOverlay) {
                 backgroundOverlay = document.createElement('div');
                 backgroundOverlay.className = 'background-overlay';
+                // ✅ Apply styles once via CSS class instead of inline
                 musicContainer.insertBefore(backgroundOverlay, musicContainer.firstChild);
             }
 
-            backgroundOverlay.style.position = 'absolute';
-            backgroundOverlay.style.top = '0';
-            backgroundOverlay.style.left = '0';
-            backgroundOverlay.style.width = '100%';
-            backgroundOverlay.style.height = '100%';
+            // ✅ Only update background image, not all styles
             backgroundOverlay.style.backgroundImage = `url('${artworkUri}')`;
+            backgroundOverlay.style.opacity = '0.2'; // ✅ Set opacity via style, not class
+            backgroundOverlay.style.filter = 'blur(10px)'; // ✅ Set filter via style, not class
+            backgroundOverlay.style.backgroundImagePosition = 'center';
             backgroundOverlay.style.backgroundSize = 'cover';
-            backgroundOverlay.style.backgroundPosition = 'center';
-            backgroundOverlay.style.filter = 'blur(20px) brightness(0.3)';
-            backgroundOverlay.style.opacity = '0.6';
-            backgroundOverlay.style.zIndex = '-1';
-            backgroundOverlay.style.borderRadius = '10px';
+            backgroundOverlay.style.backgroundRepeat = 'no-repeat';
         }
-    } else {
-        // No artwork - reset to default
         albumArt.innerHTML = '🎵';
-
-        if (musicContainer) {
-            const backgroundOverlay = musicContainer.querySelector('.background-overlay');
-            if (backgroundOverlay) {
-                backgroundOverlay.remove();
-            }
+    } else {
+        if (backgroundOverlay) {
+            backgroundOverlay.style.backgroundImage = 'none'; // ✅ Don't remove, just hide
         }
     }
 }

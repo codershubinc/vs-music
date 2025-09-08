@@ -150,7 +150,7 @@
         },
         "music.showProgressBar": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Show progress bar in music panel"
         }
       }
