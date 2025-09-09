@@ -1,3 +1,4 @@
+/* eslint-disable curly */
 function updateStatusIndicator(status) {
     const statusIndicator = document.getElementById('status-indicator');
     if (!statusIndicator) {
@@ -63,40 +64,45 @@ let lastArtworkUri = '';
 let backgroundOverlay = null;
 
 function updateArtwork(artworkUri) {
-    // ✅ Skip if artwork hasn't changed
-    if (artworkUri === lastArtworkUri) { return; }
+    if (artworkUri === lastArtworkUri) return console.log("Artwork unchanged, skipping update");
+    ;
     lastArtworkUri = artworkUri;
 
     const albumArt = document.getElementById('album-art');
-    const musicContainer = document.querySelector('.music-container');
-    if (!albumArt) { return; }
+    if (!albumArt) return;
 
-    if (artworkUri && artworkUri !== '') {
-        albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" onerror="this.parentElement.innerHTML='🎵'">`;
+    try {
+        if (artworkUri?.trim()) {
+            console.log("Updating artwork to:", artworkUri);
 
-        if (musicContainer) {
-            // ✅ Reuse existing overlay instead of creating new one
-            if (!backgroundOverlay) {
-                backgroundOverlay = document.createElement('div');
-                backgroundOverlay.className = 'background-overlay';
-                // ✅ Apply styles once via CSS class instead of inline
-                musicContainer.insertBefore(backgroundOverlay, musicContainer.firstChild);
-            }
-
-            // ✅ Only update background image, not all styles
-            backgroundOverlay.style.backgroundImage = `url('${artworkUri}')`;
-            backgroundOverlay.style.opacity = '0.2'; // ✅ Set opacity via style, not class
-            backgroundOverlay.style.filter = 'blur(10px)'; // ✅ Set filter via style, not class
-            backgroundOverlay.style.backgroundImagePosition = 'center';
-            backgroundOverlay.style.backgroundSize = 'cover';
-            backgroundOverlay.style.backgroundRepeat = 'no-repeat';
+            albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" 
+                                onerror="this.parentElement.innerHTML='🎵'; console.warn('Failed to load artwork:', '${artworkUri}')">`;
+            updateBackgroundOverlay(artworkUri);
+        } else {
+            clearArtwork();
         }
-        albumArt.innerHTML = '🎵';
-    } else {
-        if (backgroundOverlay) {
-            backgroundOverlay.style.backgroundImage = 'none'; // ✅ Don't remove, just hide
-        }
+    } catch (error) {
+        console.error('Error updating artwork:', error);
+        clearArtwork();
     }
+}
+
+function updateBackgroundOverlay(artworkUri) {
+    const musicContainer = document.querySelector('.music-container');
+    if (!musicContainer) return;
+
+    if (!backgroundOverlay) {
+        backgroundOverlay = document.createElement('div');
+        backgroundOverlay.className = 'background-overlay';
+        musicContainer.insertBefore(backgroundOverlay, musicContainer.firstChild);
+    }
+    backgroundOverlay.style.backgroundImage = `url('${artworkUri}')`;
+}
+
+function clearArtwork() {
+    const albumArt = document.getElementById('album-art');
+    if (albumArt) albumArt.innerHTML = '🎵';
+    if (backgroundOverlay) backgroundOverlay.style.backgroundImage = 'none';
 }
 
 // Add loading state functions
