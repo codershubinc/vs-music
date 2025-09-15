@@ -42,9 +42,12 @@ body::-webkit-scrollbar {
     left: 0;
     width: 100%;
     height: 100%;
+    opacity: 0.2;
+    filter: blur(10px);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
     z-index: -1;
-    border-radius: 10px;
-    transition: opacity 0.3s ease;
 }
 
 /* Visibility states */
@@ -510,4 +513,39 @@ body::-webkit-scrollbar {
 /* Smooth animations */
 * {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Attribution styling - positioned in top-right corner */
+.attribution {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.attribution:hover {
+    opacity: 1;
+}
+
+.attribution a {
+    color: var(--vscode-descriptionForeground, #cccccc);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.attribution a:hover {
+    color: var(--vscode-textLink-foreground, #4080ff);
+    background: rgba(0, 0, 0, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
