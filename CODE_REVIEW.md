@@ -33,7 +33,7 @@ The project implements a clean 4-layer architecture:
            ↓
 ┌─────────────────────────────────────┐
 │ Layer 3: Platform-Specific Services │
-│ • src/linux/musicService.ts        │
+│ • src/linux/musicService.ts         │
 │ • MPRIS integration                 │
 │ • playerctl communication           │
 └─────────────────────────────────────┘
