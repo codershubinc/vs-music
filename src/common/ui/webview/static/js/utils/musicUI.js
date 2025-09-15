@@ -103,6 +103,8 @@ function updateBackgroundOverlay(artworkUri) {
 }
 
 function clearArtwork() {
+    return console.log("Clearing artwork to default");
+    
     const albumArt = document.getElementById('album-art');
     if (albumArt) albumArt.innerHTML = '🎵';
     if (backgroundOverlay) backgroundOverlay.style.backgroundImage = 'none';
