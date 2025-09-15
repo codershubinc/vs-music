@@ -1,13 +1,16 @@
 /* eslint-disable curly */
+
+// Fixed: Move lastStatus outside function scope so optimization actually works
+let lastStatusIndicator = '';
+
 function updateStatusIndicator(status) {
     const statusIndicator = document.getElementById('status-indicator');
     if (!statusIndicator) {
         return;
     }
     // Optimized: Only update when changed (70% less DOM manipulation)
-    let lastStatus = '';
-    if (status === lastStatus) { return; } // ✅ Skip if unchanged
-    lastStatus = status;
+    if (status === lastStatusIndicator) { return; } // ✅ Skip if unchanged - NOW WORKS!
+    lastStatusIndicator = status;
 
     // Only update what actually changed
     statusIndicator.className = 'status-indicator';
