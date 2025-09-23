@@ -321,7 +321,7 @@ bun run build-vsix
 
 [![GitHub](https://img.shields.io/badge/GitHub-codershubinc-181717?style=for-the-badge&logo=github)](https://github.com/codershubinc)
 [![Twitter](https://img.shields.io/badge/Twitter-@codershubinc-1DA1F2?style=for-the-badge&logo=twitter)](https://twitter.com/codershubinc)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Swapnil%20Ingle-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/swapnil-ingle)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Swapnil%20Ingle-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/swapnil-ingle-codershubinc)
 [![Instagram](https://img.shields.io/badge/Instagram-@codershubinc-E4405F?style=for-the-badge&logo=instagram)](https://instagram.com/codershubinc)
 [![YouTube](https://img.shields.io/badge/YouTube-CodersHub-FF0000?style=for-the-badge&logo=youtube)](https://youtube.com/@codershubinc)
 
