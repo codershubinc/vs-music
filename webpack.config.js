@@ -50,7 +50,12 @@ const extensionConfig = {
           to: '[path][name][ext]',
           noErrorOnMissing: true
         },
-
+        {
+          from: 'src/common/ui/webview/themes/**/*',
+          to: '[path][name][ext]',
+          noErrorOnMissing: true
+        }
+        ,
         // Copy all JS files under utils/ recursively and preserve subfolders (helpers/, etc.)
         {
           from: 'src/common/ui/webview/static/js/utils/**/*',

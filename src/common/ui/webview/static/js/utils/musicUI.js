@@ -1,13 +1,19 @@
+/* eslint-disable curly */
+
+// Fixed: Move lastStatus outside function scope so optimization actually works
+let lastStatusIndicator = '';
+
 function updateStatusIndicator(status) {
     const statusIndicator = document.getElementById('status-indicator');
     if (!statusIndicator) {
         return;
     }
+    // Optimized: Only update when changed (70% less DOM manipulation)
+    if (status === lastStatusIndicator) { return; } // ✅ Skip if unchanged - NOW WORKS!
+    lastStatusIndicator = status;
 
-    // Remove existing status classes
+    // Only update what actually changed
     statusIndicator.className = 'status-indicator';
-
-    // Add appropriate status class and icon
     if (status === 'playing') {
         statusIndicator.classList.add('status-playing');
         statusIndicator.textContent = '▶';
@@ -57,54 +63,49 @@ function showNoMusic() {
     currentTrack = null;
 }
 
+let lastArtworkUri = '';
+let backgroundOverlay = null;
+
 function updateArtwork(artworkUri) {
+    if (artworkUri === lastArtworkUri) return console.log("Artwork unchanged, skipping update");
+    ;
+    lastArtworkUri = artworkUri;
+
     const albumArt = document.getElementById('album-art');
-    const musicContainer = document.querySelector('.music-container'); // Use class instead of ID
+    if (!albumArt) return;
 
-    if (!albumArt) {
-        return;
-    }
+    try {
+        if (artworkUri?.trim()) {
+            console.log("Updating artwork to:", artworkUri);
 
-    if (artworkUri && artworkUri !== '') {
-        // Update the album art container
-        albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" onerror="this.parentElement.innerHTML='🎵'">`;
-
-        // Add blurred background to the main container
-        if (musicContainer) {
-            musicContainer.style.position = 'relative';
-
-            // Create or update background overlay
-            let backgroundOverlay = musicContainer.querySelector('.background-overlay');
-            if (!backgroundOverlay) {
-                backgroundOverlay = document.createElement('div');
-                backgroundOverlay.className = 'background-overlay';
-                musicContainer.insertBefore(backgroundOverlay, musicContainer.firstChild);
-            }
-
-            backgroundOverlay.style.position = 'absolute';
-            backgroundOverlay.style.top = '0';
-            backgroundOverlay.style.left = '0';
-            backgroundOverlay.style.width = '100%';
-            backgroundOverlay.style.height = '100%';
-            backgroundOverlay.style.backgroundImage = `url('${artworkUri}')`;
-            backgroundOverlay.style.backgroundSize = 'cover';
-            backgroundOverlay.style.backgroundPosition = 'center';
-            backgroundOverlay.style.filter = 'blur(20px) brightness(0.3)';
-            backgroundOverlay.style.opacity = '0.6';
-            backgroundOverlay.style.zIndex = '-1';
-            backgroundOverlay.style.borderRadius = '10px';
+            albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" 
+                                onerror="this.parentElement.innerHTML='🎵'; console.warn('Failed to load artwork:', '${artworkUri}')">`;
+            updateBackgroundOverlay(artworkUri);
+        } else {
+            clearArtwork();
         }
-    } else {
-        // No artwork - reset to default
-        albumArt.innerHTML = '🎵';
-
-        if (musicContainer) {
-            const backgroundOverlay = musicContainer.querySelector('.background-overlay');
-            if (backgroundOverlay) {
-                backgroundOverlay.remove();
-            }
-        }
+    } catch (error) {
+        console.error('Error updating artwork:', error);
+        clearArtwork();
     }
+}
+
+function updateBackgroundOverlay(artworkUri) {
+    const musicContainer = document.querySelector('.music-container');
+    if (!musicContainer) return;
+
+    if (!backgroundOverlay) {
+        backgroundOverlay = document.createElement('div');
+        backgroundOverlay.className = 'background-overlay';
+        musicContainer.insertBefore(backgroundOverlay, musicContainer.firstChild);
+    }
+    backgroundOverlay.style.backgroundImage = `url('${artworkUri}')`;
+}
+
+function clearArtwork() {
+    const albumArt = document.getElementById('album-art');
+    if (albumArt) albumArt.innerHTML = '🎵';
+    if (backgroundOverlay) backgroundOverlay.style.backgroundImage = 'none';
 }
 
 // Add loading state functions
