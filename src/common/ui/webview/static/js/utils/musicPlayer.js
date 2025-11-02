@@ -20,7 +20,9 @@ import { toggleProgressBar, updateProgress, updateTime } from './timeUpdate.js';
 
         switch (message.command) {
             case 'updateTrack':
-                updateTrack(message.track, message.artworkUri, message.position, message.showProgressBar);
+                // Prefer artworkDataUri (base64) if provided, otherwise use webview URI
+                const artworkToUse = message.artworkDataUri || message.artworkUri;
+                updateTrack(message.track, artworkToUse, message.position, message.showProgressBar);
                 break;
 
         }

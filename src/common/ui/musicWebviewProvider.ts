@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 import LinuxMusicController from '../../linux/index';
+import { ArtworkUtil } from '../../linux/utils/artworkUtil';
 
 // Unified webview provider that works across all platforms using platform-specific controllers
 export class MusicWebviewProvider implements vscode.WebviewViewProvider {
@@ -153,17 +154,46 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                 return;
             }
 
-            // Process artwork and convert to webview-compatible URI
-            const artworkUri = await this._controller.getArtworkUri(
-                trackInfo.artUrl || '',
-                this._view.webview
-            );
+            // Prefer to get local path from ArtworkUtil and provide both a webview URI
+            // and a base64 data-URI fallback (data URI helps when the CDN mapping fails)
+            let webviewArtworkUri = '';
+            let artworkDataUri = '';
 
-            // Send updated data to webview
+            try {
+                const localPath = await ArtworkUtil.downloadArtwork(trackInfo.artUrl || '');
+                if (localPath) {
+                    try {
+                        const fileUri = vscode.Uri.file(localPath);
+                        webviewArtworkUri = this._view!.webview.asWebviewUri(fileUri).toString();
+                    } catch {
+                        webviewArtworkUri = '';
+                    }
+
+                    try {
+                        // Synchronous read here is acceptable because updates are infrequent and small images
+                        const buffer = fs.readFileSync(localPath);
+                        const ext = path.extname(localPath).toLowerCase();
+                        let mime = 'image/jpeg';
+                        if (ext === '.png') mime = 'image/png';
+                        else if (ext === '.webp') mime = 'image/webp';
+                        else if (ext === '.jpg' || ext === '.jpeg') mime = 'image/jpeg';
+
+                        artworkDataUri = `data:${mime};base64,${buffer.toString('base64')}`;
+                    } catch {
+                        artworkDataUri = '';
+                    }
+                }
+            } catch (err) {
+                webviewArtworkUri = '';
+                artworkDataUri = '';
+            }
+
+            // Send updated data to webview (include both URIs; webview prefers data URI if provided)
             this._view.webview.postMessage({
                 command: 'updateTrack',
                 track: trackInfo,
-                artworkUri: artworkUri,
+                artworkUri: webviewArtworkUri,
+                artworkDataUri: artworkDataUri,
                 position: currentPosition || 0,
                 showProgressBar: this.getShowProgressBar()
             });
