@@ -106,10 +106,10 @@ export class LinuxMusicController {
 
         try {
             // Delegate to centralized ArtworkUtil
-            const localUri = await ArtworkUtil.downloadArtwork(artUrl);
-            if (localUri) {
-                // Convert file URI to webview URI
-                const fileUri = vscode.Uri.parse(localUri);
+            const localPath = await ArtworkUtil.downloadArtwork(artUrl);
+            if (localPath) {
+                // Convert file path directly to webview URI
+                const fileUri = vscode.Uri.file(localPath);
                 return webview.asWebviewUri(fileUri).toString();
             }
             return '';

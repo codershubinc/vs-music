@@ -8,7 +8,7 @@ import * as http from 'http';
  * Cache entry for LRU eviction
  */
 interface CacheEntry {
-    uri: string;
+    filePath: string;
     size: number;
     lastAccess: number;
 }
@@ -33,7 +33,7 @@ export class ArtworkUtil {
     /**
      * Downloads and caches artwork with LRU eviction, validation, and retry logic
      * @param artUrl The artwork URL (file://, http://, or https://)
-     * @returns Promise<string | null> Local file URI or null if failed
+     * @returns Promise<string | null> Local file path or null if failed
      */
     public static async downloadArtwork(artUrl: string): Promise<string | null> {
         if (!artUrl || !this.extensionContext) {
@@ -45,7 +45,7 @@ export class ArtworkUtil {
             const cached = this.artworkCache.get(artUrl);
             if (cached) {
                 cached.lastAccess = Date.now();
-                return cached.uri;
+                return cached.filePath;
             }
 
             // Handle file:// URLs by copying to extension storage
@@ -99,11 +99,10 @@ export class ArtworkUtil {
         // Validate image
         const isValid = await this.validateImage(localPath);
         if (!isValid) {
-            console.warn('Invalid image file, removing:', artUrl);
             try {
                 await fs.promises.unlink(localPath);
-            } catch (error) {
-                console.error('Failed to delete invalid image:', error);
+            } catch {
+                // Ignore cleanup errors
             }
             return null;
         }
@@ -112,17 +111,15 @@ export class ArtworkUtil {
         const stats = await fs.promises.stat(localPath);
         await this.enforceCacheLimits(stats.size);
 
-        const vscodeUri = vscode.Uri.file(localPath).toString();
-
         // Add to cache with metadata
         this.artworkCache.set(artUrl, {
-            uri: vscodeUri,
+            filePath: localPath,
             size: stats.size,
             lastAccess: Date.now()
         });
         this.currentCacheSize += stats.size;
 
-        return vscodeUri;
+        return localPath;
     }
 
     /**
@@ -141,16 +138,20 @@ export class ArtworkUtil {
         try {
             await fs.promises.access(localPath);
             const stats = await fs.promises.stat(localPath);
-            const vscodeUri = vscode.Uri.file(localPath).toString();
 
             // Update cache with existing file
             this.artworkCache.set(artUrl, {
-                uri: vscodeUri,
+                filePath: localPath,
                 size: stats.size,
                 lastAccess: Date.now()
             });
 
-            return vscodeUri;
+            // Don't add to currentCacheSize if already cached
+            if (!this.artworkCache.has(artUrl)) {
+                this.currentCacheSize += stats.size;
+            }
+
+            return localPath;
         } catch {
             // File doesn't exist, need to download
         }
@@ -159,18 +160,16 @@ export class ArtworkUtil {
         try {
             await this.downloadWithRetry(artUrl, localPath);
         } catch (error) {
-            console.error('Error downloading artwork after retries:', error);
             return null;
         }
 
         // Validate the downloaded image
         const isValid = await this.validateImage(localPath);
         if (!isValid) {
-            console.warn('Invalid image downloaded, removing:', artUrl);
             try {
                 await fs.promises.unlink(localPath);
-            } catch (error) {
-                console.error('Failed to delete invalid image:', error);
+            } catch {
+                // Ignore cleanup errors
             }
             return null;
         }
@@ -179,17 +178,15 @@ export class ArtworkUtil {
         const stats = await fs.promises.stat(localPath);
         await this.enforceCacheLimits(stats.size);
 
-        const vscodeUri = vscode.Uri.file(localPath).toString();
-
         // Add to cache with metadata
         this.artworkCache.set(artUrl, {
-            uri: vscodeUri,
+            filePath: localPath,
             size: stats.size,
             lastAccess: Date.now()
         });
         this.currentCacheSize += stats.size;
 
-        return vscodeUri;
+        return localPath;
     }
 
     /**
@@ -229,8 +226,7 @@ export class ArtworkUtil {
             }
 
             return false;
-        } catch (error) {
-            console.error('Image validation failed:', error);
+        } catch {
             return false;
         }
     }
@@ -252,10 +248,9 @@ export class ArtworkUtil {
 
             // Delete file from disk
             try {
-                const filePath = vscode.Uri.parse(entry.uri).fsPath;
-                await fs.promises.unlink(filePath);
-            } catch (error) {
-                console.warn('Failed to delete cached artwork:', error);
+                await fs.promises.unlink(entry.filePath);
+            } catch {
+                // Ignore deletion errors
             }
 
             // Remove from cache
@@ -295,8 +290,6 @@ export class ArtworkUtil {
                 // Exponential backoff: 1s, 2s, 4s
                 const delay = Math.pow(2, attempt - 1) * 1000;
                 await new Promise(resolve => setTimeout(resolve, delay));
-
-                console.log(`Retry ${attempt}/${maxRetries} for artwork: ${url}`);
             }
         }
     }
@@ -355,10 +348,9 @@ export class ArtworkUtil {
 
         for (const [, entry] of entriesToDelete) {
             try {
-                const filePath = vscode.Uri.parse(entry.uri).fsPath;
-                await fs.promises.unlink(filePath);
-            } catch (error) {
-                console.warn('Failed to delete artwork during cleanup:', error);
+                await fs.promises.unlink(entry.filePath);
+            } catch {
+                // Ignore cleanup errors
             }
         }
 
@@ -375,13 +367,13 @@ export class ArtworkUtil {
     }
 
     /**
-     * Get cached artwork URI if exists
+     * Get cached artwork file path if exists
      */
     public static getCachedArtwork(artUrl: string): string | null {
         const entry = this.artworkCache.get(artUrl);
         if (entry) {
             entry.lastAccess = Date.now();
-            return entry.uri;
+            return entry.filePath;
         }
         return null;
     }
