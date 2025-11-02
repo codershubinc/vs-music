@@ -100,6 +100,44 @@ body::-webkit-scrollbar {
     height: 100%;
     object-fit: cover;
     border-radius: 8px;
+    opacity: 0;
+    animation: fadeInArtwork 0.3s ease-in forwards;
+}
+
+@keyframes fadeInArtwork {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Loading state for artwork */
+#album-art.loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 25%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .artwork-placeholder {

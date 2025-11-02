@@ -78,11 +78,22 @@ function registerCommands(context: vscode.ExtensionContext): void {
 	);
 }
 
-export function deactivate() {
-	console.log('VS Music extension deactivated');
+export async function deactivate() {
+	console.log('VS Music extension deactivating...');
 
 	if (webviewProvider) {
 		webviewProvider.dispose();
 		webviewProvider = undefined;
 	}
+
+	// Clean up artwork cache and disk space
+	try {
+		await ArtworkUtil.dispose();
+		console.log('Artwork cache cleaned up successfully');
+	} catch (error) {
+		console.error('Error cleaning up artwork cache:', error);
+	}
+
+	console.log('VS Music extension deactivated');
 }
+

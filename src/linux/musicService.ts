@@ -1,9 +1,5 @@
 import * as vscode from 'vscode';
-import { spawn } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as https from 'https';
-import * as http from 'http';
+import { spawn } from 'child_process'; 
 
 export interface TrackInfo {
     title: string;
@@ -23,7 +19,9 @@ export class LinuxMusicService {
     private onPositionChangedCallback?: (position: number) => void;
     private isPlayerctlAvailable = false;
     private extensionContext: vscode.ExtensionContext;
-    private artworkCache = new Map<string, string>();
+
+    // simple in-memory artwork cache: key -> local path or URL
+    private artworkCache: Map<string, string> = new Map();
 
     private trackCache: { data: TrackInfo | null, timestamp: number } = { data: null, timestamp: 0 };
     private readonly CACHE_DURATION = 800; // 800ms cache
@@ -70,13 +68,8 @@ export class LinuxMusicService {
                 if (this.hasTrackChanged(track)) {
                     this.currentTrack = track;
 
-                    // Download and cache artwork if available
-                    if (track && track.artUrl) {
-                        const artworkPath = await this.downloadArtwork(track.artUrl);
-                        if (artworkPath) {
-                            track.artUrl = artworkPath;
-                        }
-                    }
+                    // Artwork will be processed by the controller layer
+                    // No need to download here - just pass the URL
 
                     this.onTrackChangedCallback?.(track);
                 }
@@ -181,86 +174,6 @@ export class LinuxMusicService {
             return parseInt(parts[0]) * 60 + parseInt(parts[1]);
         }
         return 0;
-    }
-
-    private async downloadArtwork(artworkUrl: string): Promise<string | null> {
-        if (!artworkUrl) {
-            return null;
-        }
-
-        // Check cache first
-        if (this.artworkCache.has(artworkUrl)) {
-            return this.artworkCache.get(artworkUrl)!;
-        }
-
-        try {
-            // Handle file:// URLs (common with GSConnect)
-            if (artworkUrl.startsWith('file://')) {
-                const filePath = artworkUrl.replace('file://', '');
-                if (fs.existsSync(filePath)) {
-                    const uploadsDir = path.join(this.extensionContext.globalStorageUri.fsPath, 'uploads');
-                    if (!fs.existsSync(uploadsDir)) {
-                        fs.mkdirSync(uploadsDir, { recursive: true });
-                    }
-
-                    const fileName = path.basename(filePath);
-                    const targetPath = path.join(uploadsDir, fileName);
-
-                    // Copy file to extension storage
-                    fs.copyFileSync(filePath, targetPath);
-
-                    // Create vscode URI for webview
-                    const webviewUri = vscode.Uri.file(targetPath).with({ scheme: 'vscode-resource' });
-                    this.artworkCache.set(artworkUrl, webviewUri.toString());
-                    return webviewUri.toString();
-                }
-                return null;
-            }
-
-            // Handle HTTP/HTTPS URLs
-            if (artworkUrl.startsWith('http')) {
-                const uploadsDir = path.join(this.extensionContext.globalStorageUri.fsPath, 'uploads');
-                if (!fs.existsSync(uploadsDir)) {
-                    fs.mkdirSync(uploadsDir, { recursive: true });
-                }
-
-                const fileName = `artwork_${Date.now()}.jpg`;
-                const filePath = path.join(uploadsDir, fileName);
-
-                await this.downloadFile(artworkUrl, filePath);
-
-                const webviewUri = vscode.Uri.file(filePath).with({ scheme: 'vscode-resource' });
-                this.artworkCache.set(artworkUrl, webviewUri.toString());
-                return webviewUri.toString();
-            }
-
-            return null;
-        } catch (error) {
-            console.error('Error downloading artwork:', error);
-            return null;
-        }
-    }
-
-    private downloadFile(url: string, filePath: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const protocol = url.startsWith('https') ? https : http;
-
-            protocol.get(url, (response) => {
-                if (response.statusCode === 200) {
-                    const fileStream = fs.createWriteStream(filePath);
-                    response.pipe(fileStream);
-
-                    fileStream.on('finish', () => {
-                        fileStream.close();
-                        resolve();
-                    });
-
-                    fileStream.on('error', reject);
-                } else {
-                    reject(new Error(`HTTP ${response.statusCode}`));
-                }
-            }).on('error', reject);
-        });
     }
 
     // Control methods

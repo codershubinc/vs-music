@@ -78,14 +78,33 @@ function updateArtwork(artworkUri) {
         if (artworkUri?.trim()) {
             console.log("Updating artwork to:", artworkUri);
 
-            albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork" 
-                                onerror="this.parentElement.innerHTML='🎵'; console.warn('Failed to load artwork:', '${artworkUri}')">`;
-            updateBackgroundOverlay(artworkUri);
+            // Show loading state
+            albumArt.classList.add('loading');
+
+            // Preload image before displaying
+            const img = new Image();
+
+            img.onload = () => {
+                // Remove loading state and display image with animation
+                albumArt.classList.remove('loading');
+                albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork">`;
+                updateBackgroundOverlay(artworkUri);
+            };
+
+            img.onerror = () => {
+                console.warn('Failed to load artwork:', artworkUri);
+                albumArt.classList.remove('loading');
+                clearArtwork();
+            };
+
+            // Start loading
+            img.src = artworkUri;
         } else {
             clearArtwork();
         }
     } catch (error) {
         console.error('Error updating artwork:', error);
+        albumArt.classList.remove('loading');
         clearArtwork();
     }
 }
