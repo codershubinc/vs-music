@@ -123,7 +123,7 @@ export class LinuxMusicService {
             ]);
 
             let output = '';
-            playerctl.stdout.on('data', (data) => {
+            playerctl.stdout.on('data', (data) => { 
                 output += data.toString();
             });
 
