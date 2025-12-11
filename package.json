@@ -159,7 +159,7 @@
   "displayName": "VS Music",
   "icon": "icon.png",
   "engines": {
-    "vscode": "^1.103.0"
+    "vscode": ">=1.103.0"
   },
   "scripts": {
     "vscode:prepublish": "bun run package",
