@@ -1,6 +1,6 @@
 {
   "name": "music",
-  "version": "0.1.7",
+  "version": "0.2.1",
   "publisher": "codershubinc",
   "author": "Swapnil Ingle",
   "license": "MIT",
@@ -40,13 +40,14 @@
     "developer-tools",
     "entertainment",
     "audio-control",
-    "music-widget"
+    "music-widget",
+    "windows",
+    "smtc",
+    "media-session"
   ],
   "main": "./dist/extension.js",
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.html",
-    "dist/**/*.css",  
+    "dist",
     "LICENSE",
     "README.md",
     "icon.png"
@@ -155,24 +156,33 @@
       }
     }
   },
-  "description": "Stable Linux music player widget with status bar, controls & now playing info via MPRIS (Spotify, VLC, more)",
+  "description": "Cross-platform music player widget for Windows & Linux with status bar, controls & now playing info (Spotify, VLC, more)",
   "displayName": "VS Music",
   "icon": "icon.png",
   "engines": {
     "vscode": ">=1.103.0"
   },
   "scripts": {
-    "vscode:prepublish": "bun run package",
+    "vscode:prepublish": "echo 'Skipping automatic build...'",
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
+    "package:win-build": "webpack --mode production --devtool hidden-source-map --env platform=win32",
+    "package:linux-build": "webpack --mode production --devtool hidden-source-map --env platform=linux",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "bun run compile-tests && bun run compile && bun run lint",
     "lint": "eslint src",
     "test": "vscode-test",
     "vsce:package": "vsce package",
-    "build-vsix": "bun run package && bun run vsce:package"
+    "build-vsix": "bun run package && bun run vsce:package",
+    "package:win": "bun run package:win-build && vsce package --target win32-x64",
+    "package:linux": "bun run package:linux-build && vsce package --target linux-x64",
+    "publish:win": "bun run package:win-build && vsce publish --target win32-x64",
+    "publish:linux": "bun run package:linux-build && vsce publish --target linux-x64",
+    "publish:all": "bun run publish:win && bun run publish:linux"
   },
-  "dependencies": {}
+  "dependencies": {
+    "uuid": "^13.0.0"
+  }
 }

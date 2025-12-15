@@ -5,6 +5,24 @@ All notable changes to the VS Music extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-12-16
+
+### Added
+
+- **Windows Support**: Full support for Windows media controls using native Windows APIs
+- **Cross-Platform Architecture**: Refactored codebase to support multiple operating systems (Linux and Windows)
+- **Windows Media Integration**: Integration with Windows System Media Transport Controls (SMTC)
+- **Automatic Platform Detection**: Extension automatically detects the operating system and loads the appropriate service
+
+### Enhanced
+
+- **Architecture**: Split platform-specific logic into separate modules (`linux/` and `windows/`)
+- **Code Organization**: Improved project structure for better maintainability and scalability
+
+### Notes
+
+- This is a major release introducing Windows support alongside the existing Linux support.
+
 ## [0.1.6] - 2025-09-15
 
 ### Fixed

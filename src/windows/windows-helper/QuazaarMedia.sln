@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11304.174
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuazaarMedia", "QuazaarMedia.csproj", "{23BD5026-117A-39AF-791C-C9839B50A8B2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23BD5026-117A-39AF-791C-C9839B50A8B2}.Debug|x64.ActiveCfg = Debug|x64
+		{23BD5026-117A-39AF-791C-C9839B50A8B2}.Debug|x64.Build.0 = Debug|x64
+		{23BD5026-117A-39AF-791C-C9839B50A8B2}.Release|x64.ActiveCfg = Release|x64
+		{23BD5026-117A-39AF-791C-C9839B50A8B2}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4771DE25-29CC-4FEC-AA4C-094857E824F9}
+	EndGlobalSection
+EndGlobal

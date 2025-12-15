@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { spawn } from 'child_process'; 
+import { spawn } from 'child_process';
 
 export interface TrackInfo {
     title: string;
@@ -123,7 +123,7 @@ export class LinuxMusicService {
             ]);
 
             let output = '';
-            playerctl.stdout.on('data', (data) => { 
+            playerctl.stdout.on('data', (data) => {
                 output += data.toString();
             });
 
@@ -285,3 +285,6 @@ export class LinuxMusicService {
         this.artworkCache.clear();
     }
 }
+
+
+

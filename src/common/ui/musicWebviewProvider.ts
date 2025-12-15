@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as os from 'os';
 
-import LinuxMusicController from '../../linux/index';
 import { ArtworkUtil } from '../../linux/utils/artworkUtil';
+import { IMusicController } from '../models/models';
+import { MusicControllerFactory } from '../musicControllerFactory';
 
 // Unified webview provider that works across all platforms using platform-specific controllers
 export class MusicWebviewProvider implements vscode.WebviewViewProvider {
@@ -12,26 +12,15 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'vsMusicPlayer';
 
     private _view?: vscode.WebviewView;
-    private _controller: LinuxMusicController;
+    private _controller: IMusicController | null;
     private _updateTimer?: NodeJS.Timeout;
     private _context: vscode.ExtensionContext;
 
     // Initialize webview provider and platform-specific music controller
     constructor(context: vscode.ExtensionContext) {
         this._context = context;
-
-        // Detect platform and initialize appropriate controller
-        const platform = os.platform();
-        switch (platform) {
-            case 'linux':
-                this._controller = new LinuxMusicController(context);
-                console.log('🐧 Initialized Linux music controller (MPRIS/playerctl)');
-                break;
-            default:
-                this._controller = new LinuxMusicController(context);
-                console.warn(`⚠️ Platform ${platform} not fully supported, using Linux controller as fallback`);
-                break;
-        }
+        // Use factory to get the correct controller
+        this._controller = MusicControllerFactory.create(context, this._view?.webview);
     }
 
     // Called by VS Code when webview needs to be displayed - sets up content and event handlers
@@ -41,6 +30,7 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
+        this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
 
         // Configure webview security permissions
         webviewView.webview.options = {
@@ -89,19 +79,19 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
 
                 case 'playPause':
                     console.log('🎵 User triggered play/pause');
-                    await this._controller.playPause();
+                    await this._controller?.playPause();
                     setTimeout(() => this.updateWebview(), 100);
                     break;
 
                 case 'next':
                     console.log('🎵 User triggered next track');
-                    await this._controller.next();
+                    await this._controller?.next();
                     setTimeout(() => this.updateWebview(), 100);
                     break;
 
                 case 'previous':
                     console.log('🎵 User triggered previous track');
-                    await this._controller.previous();
+                    await this._controller?.previous();
                     setTimeout(() => this.updateWebview(), 100);
                     break;
 
@@ -142,8 +132,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         }
 
         try {
-            const trackInfo = await this._controller.getCurrentTrack();
-            const currentPosition = await this._controller.getPosition();
+            const trackInfo = await this._controller?.getCurrentTrack();
+            const currentPosition = await this._controller?.getPosition();
 
             // Handle no music playing state
             if (!trackInfo || !trackInfo.title) {
@@ -282,7 +272,7 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     public dispose(): void {
         console.log('🧹 Disposing music webview provider...');
         this.stopPeriodicUpdates();
-        this._controller.dispose();
+        this._controller?.dispose();
         this._view = undefined;
         console.log('✅ Music webview provider disposed successfully');
     }

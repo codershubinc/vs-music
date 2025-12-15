@@ -100,7 +100,7 @@ import { toggleProgressBar, updateProgress, updateTime } from './timeUpdate.js';
         updateElement('track-artist', track.artist || 'Unknown Artist');
         updateElement('track-album', track.album || 'Unknown Album');
 
-        updateArtwork(artworkUri);
+        updateArtwork(artworkUri, track.title);
         updateStatusIndicator(track.status);
         updatePlayPauseButton(track.status);
         updateTime(track.duration || 0);

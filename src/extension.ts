@@ -8,7 +8,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	console.log('VS Music extension is now active!');
 
 	ArtworkUtil.initialize(context);
-
 	try {
 		webviewProvider = new MusicWebviewProvider(context);
 
