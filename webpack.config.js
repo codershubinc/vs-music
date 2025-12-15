@@ -66,6 +66,11 @@ const extensionConfig = {
           from: 'src/common/ui/webview/musicPlayer.html',
           to: 'src/common/ui/webview/musicPlayer.html',
           noErrorOnMissing: true
+        },
+        // Copy QuazaarMedia.exe
+        {
+          from: 'src/windows/QuazaarMedia.exe',
+          to: 'src/windows/QuazaarMedia.exe',
         }
       ]
     })

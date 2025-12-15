@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<!-- Use .NET 8 or higher for AOT -->
+		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Platforms>x64</Platforms>
+
+		<!-- NATIVE AOT OPTIMIZATION -->
+		<!-- <PublishAot>true</PublishAot> -->
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>partial</TrimMode>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<StripSymbols>true</StripSymbols>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<NoWarn>$(NoWarn);IL2026;IL2104</NoWarn>
+	
+		<!-- Enable COM support for Volume Control -->
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.Windows.SDK.NET.Ref" />
+		<PackageReference Include="System.Management" Version="8.0.0" />
+		<TrimmerRootAssembly Include="System.Management" />
+	</ItemGroup>
+
+</Project>

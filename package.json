@@ -1,6 +1,6 @@
 {
   "name": "music",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "publisher": "codershubinc",
   "author": "Swapnil Ingle",
   "license": "MIT",
@@ -46,10 +46,11 @@
   "files": [
     "dist/**/*.js",
     "dist/**/*.html",
-    "dist/**/*.css",  
+    "dist/**/*.css",
     "LICENSE",
     "README.md",
-    "icon.png"
+    "icon.png",
+    "dist/**/*.exe"
   ],
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -174,5 +175,7 @@
     "vsce:package": "vsce package",
     "build-vsix": "bun run package && bun run vsce:package"
   },
-  "dependencies": {}
+  "dependencies": {
+    "uuid": "^13.0.0"
+  }
 }

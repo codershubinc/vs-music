@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { LinuxMusicService } from './musicService';
 import { ArtworkUtil } from './utils/artworkUtil';
+import { IMusicController } from '../common/models/models';
 
 /**
  * ========================================================================
@@ -41,7 +42,7 @@ import { ArtworkUtil } from './utils/artworkUtil';
  * - Clear separation of concerns (UI logic vs platform logic)
  * - Future Windows/macOS controllers can implement same interface
  */
-export class LinuxMusicController {
+export class LinuxMusicController implements IMusicController {
     private musicService: LinuxMusicService;
     private context: vscode.ExtensionContext;
 
@@ -71,21 +72,24 @@ export class LinuxMusicController {
      * Play/Pause toggle
      */
     async playPause() {
-        return await this.musicService.playPause();
+        await this.musicService.playPause();
+        return true;
     }
 
     /**
      * Next track
      */
     async next() {
-        return await this.musicService.next();
+        await this.musicService.next();
+        return true;
     }
 
     /**
      * Previous track
      */
     async previous() {
-        return await this.musicService.previous();
+        await this.musicService.previous();
+        return true;
     }
 
     /**
