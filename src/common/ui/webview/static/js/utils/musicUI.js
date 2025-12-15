@@ -63,13 +63,16 @@ function showNoMusic() {
     currentTrack = null;
 }
 
-let lastArtworkUri = '';
+let lastTitle = '';
 let backgroundOverlay = null;
 
-function updateArtwork(artworkUri) {
-    if (artworkUri === lastArtworkUri) return console.log("Artwork unchanged, skipping update");
-    ;
-    lastArtworkUri = artworkUri;
+function updateArtwork(artworkUri, title) {
+    console.log("Title current ::", title, "Prev  ::", lastTitle);
+
+
+    if (lastTitle === title) return console.log("Artwork unchanged, skipping update");
+
+    lastTitle = title;
 
     const albumArt = document.getElementById('album-art');
     if (!albumArt) return;

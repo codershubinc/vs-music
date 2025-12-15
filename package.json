@@ -40,7 +40,10 @@
     "developer-tools",
     "entertainment",
     "audio-control",
-    "music-widget"
+    "music-widget",
+    "windows",
+    "smtc",
+    "media-session"
   ],
   "main": "./dist/extension.js",
   "files": [
@@ -156,7 +159,7 @@
       }
     }
   },
-  "description": "Stable Linux music player widget with status bar, controls & now playing info via MPRIS (Spotify, VLC, more)",
+  "description": "Cross-platform music player widget for Windows & Linux with status bar, controls & now playing info (Spotify, VLC, more)",
   "displayName": "VS Music",
   "icon": "icon.png",
   "engines": {
@@ -173,7 +176,10 @@
     "lint": "eslint src",
     "test": "vscode-test",
     "vsce:package": "vsce package",
-    "build-vsix": "bun run package && bun run vsce:package"
+    "build-vsix": "bun run package && bun run vsce:package",
+    "package:win": "vsce package --target win32-x64",
+    "package:linux": "vsce package --target linux-x64",
+    "publish:all": "vsce publish --target win32-x64"
   },
   "dependencies": {
     "uuid": "^13.0.0"

@@ -1,4 +1,5 @@
 import { spawn, ChildProcessWithoutNullStreams } from "child_process";
+import { readFile, readFileSync } from "fs";
 import path from "path";
 import vscode from "vscode";
 
@@ -62,12 +63,15 @@ const onMessageReceived = (response: string) => {
             const curateTrack = {
                 title: res["Title"],
                 artist: res["Artist"],
-                album: res["Album"]
+                album: res["Album"],
+                status: res["Status"],
+                artworkUri: res["ArtworkUri"]
             };
 
             return vscodeWebview.postMessage({
                 command: 'updateTrack',
-                track: curateTrack
+                track: curateTrack,
+                artworkUri: handleArtwork(res["ArtworkUri"])
             });
         }
         console.log("Got incorrect music info .....", res["Title"]);
@@ -103,3 +107,15 @@ export const handleWinMessage = (
     }
 };
 
+let CurrentArtworkUri: string = "";
+let imageBytes = "";
+const handleArtwork = (uri: string) => {
+
+    if (CurrentArtworkUri === uri && imageBytes) { return imageBytes; };
+
+    const buff = readFileSync(uri, {}); // reading image file with no parameters
+    const data = buff.toString("base64"); //converting to string with base 64 encoding
+    if (!data) return "";
+    imageBytes = "data:image/jpeg;base64," + data; //the header is stick to /jpeg coz from the QuazaarMedia.exe it only returns the .jpg format image  
+    return imageBytes;
+};

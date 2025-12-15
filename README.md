@@ -1,18 +1,18 @@
 # VS Music Extension for VS Code
 
 ![VS Music Icon](https://img.shields.io/badge/VS%20Code-Music%20Extension-blue?logo=visual-studio-code)
+![Windows](https://img.shields.io/badge/Windows-Compatible-blue?logo=windows)
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow)
 ![Publisher](https://img.shields.io/badge/Publisher-codershubinc-orange)
-![Version](https://img.shields.io/badge/Version-0.1.7-blue)
+![Version](https://img.shields.io/badge/Version-0.2.0-blue)
+[![wakatime](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/a68f0e8f-e56d-4815-8c99-1e6c2d6a27c8.png)](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/a68f0e8f-e56d-4815-8c99-1e6c2d6a27c8)
 
-A Visual Studio Code extension that displays currently playing music information and provides playback controls directly in your editor. Perfect for Linux developers who want to stay in their coding flow while managing their music.
+A Visual Studio Code extension that displays currently playing music information and provides playback controls directly in your editor. Perfect for Windows & Linux developers who want to stay in their coding flow while managing their music.
 
-> **✨ NEW IN v0.1.7**: Major artwork system overhaul with intelligent caching, validation, and smooth loading animations. **73% faster** artwork loading with **80% less disk usage**!
+> **✨ NEW IN v0.2.0**: **Windows Support!** Now fully compatible with Windows 10/11 using native System Media Transport Controls.
 >
-> **🐧 LINUX ONLY**: Currently supports Linux systems only. Windows & macOS support coming soon.
->
-> **🪟 WINDOWS SUPPORT**: Beta version in development. Stay tuned!
+> **🚀 Cross-Platform**: Seamless experience on both Windows and Linux.
 
 ## 📸 Screenshots
 
@@ -56,6 +56,20 @@ _The extension showing current track information in VS Code with the music playe
 - **73% Faster Loading**: Optimized artwork processing pipeline
 - **80% Disk Reduction**: Intelligent cache eviction prevents bloat
 
+## 🚀 What's New in v0.2.0
+
+### 🪟 Windows Support
+
+- **✅ Native Integration**: Uses Windows System Media Transport Controls (SMTC) for reliable media control
+- **✅ Broad Compatibility**: Works with Spotify, System Media, Browser players, and more on Windows 10/11
+- **✅ Zero Configuration**: Automatically detects Windows environment and activates the appropriate service
+- **✅ Feature Parity**: Full support for playback controls, metadata display, and album artwork
+
+### 🔧 Technical Improvements
+
+- **✅ Cross-Platform Architecture**: Refactored codebase to cleanly separate Windows and Linux logic
+- **✅ Unified Experience**: Consistent UI and behavior across both operating systems
+
 ## 🚀 What's New in v0.1.7
 
 ### 🎨 Artwork System Overhaul
@@ -84,33 +98,49 @@ _The extension showing current track information in VS Code with the music playe
 ### 🐛 Bug Fixes
 
 - Fixed artwork cache growing unbounded causing disk bloat
-- Fixed synchronous file operations blocking the event loop
-- Fixed missing cleanup causing memory leaks
-- Fixed artwork flashing when switching tracks
+- Fi� Platform Compatibility
 
----
+### 🪟 Windows
 
-## 🚀 Performance Optimizations (v0.1.6)
+Supported on Windows 10 and Windows 11 (Build 19041 or later).
 
-- **70% Reduction in DOM Updates**: Fixed critical performance bug in status indicator updates
-- **Smart Change Detection**: UI components now properly skip unnecessary updates when content hasn't changed
-- **Improved Memory Usage**: Better variable scoping and memory management in webview scripts
-- **Faster UI Response**: Optimized DOM manipulation reduces CPU usage and improves responsiveness
-- **Attribution Repositioned**: Clean top-right corner placement for better visual balance
+**Supported Players:**
 
-## 🐧 Linux Compatibility
+- Spotify
+- System Media Player
+- Google Chrome
+- Microsoft Edge
+- Firefox
+- Any app that integrates with Windows System Media Transport Controls (SMTC)
 
-> **⚠️ Platform Notice**: This extension currently supports **Linux only**. Windows and macOS support is in development.
+### 🐧 Linux
 
-This extension is specifically designed for Linux systems and uses `playerctl` to communicate with MPRIS-compatible media players.
+Supported on most modern Linux distributions. Requires `playerctl`.
 
-### Supported Music Players
-
-The following Linux music players are supported through MPRIS/playerctl:
+**Supported Players:**
 
 - **Spotify**
 - **VLC Media Player**
 - **Rhythmbox**
+- **Audacious**
+- **Clementine**
+- **Strawberry**
+- **Amarok**
+- **Banshee**
+- **Totem**
+- **mpv** (with MPRIS script)
+- **Chromium/Chrome** (when playing media)
+- **Firefox** (when playing media)
+- And any other MPRIS-compatible player
+
+## 📦 Installation
+
+### Windows
+
+No additional software is required! The extension includes a lightweight helper utility to communicate with Windows media services.
+
+### Linux\*Rhythmbox\*\*
+
 - **Audacious**
 - **Clementine**
 - **Strawberry**
@@ -281,9 +311,18 @@ Configure the extension through VS Code settings (File → Preferences → Setti
 | `music.maxTitleLength`    | number  | `30`      | Maximum length of song title in status bar     |
 | `music.showProgressBar`   | boolean | `false`   | Show progress bar in music panel               |
 
-### Advanced Configuration
+### Windows Issues
 
-The artwork caching system has built-in limits that work for most users:
+#### ❌ Extension doesn't detect music
+
+- **Check**: Ensure your music player is running and playing audio.
+- **Verify**: Some players need to be playing for a few seconds before they appear in the System Media Transport Controls.
+- **Browser**: If using a browser, ensure "Hardware Media Key Handling" is enabled (usually on by default).
+
+### Linux Issues
+
+> **💡 Quick Fix**: 90% of issues are solved by installing `playerctl` and restarting VS Code!
+> The artwork caching system has built-in limits that work for most users:
 
 - **Cache Size**: 100MB maximum (prevents disk bloat)
 - **Cache Entries**: 200 images maximum (LRU eviction)
@@ -376,23 +415,13 @@ If you encounter issues:
 
 The extension works with any audio format supported by your music player, including:
 
-- MP3, FLAC, OGG, AAC, WAV
-- Streaming services (Spotify, YouTube Music in browser)
-- Internet radio streams
-- Podcasts and audiobooks
-
-## 🤝 Contributing
-
-Contributions are welcome! This extension is specifically designed for Linux systems.
-
 ### Development Setup
 
 1. Clone the repository: `git clone https://github.com/codershubinc/vs-music.git`
-2. Navigate to music directory: `cd vs-music/music`
+2. Navigate to music directory: `cd vs-music`
 3. Install dependencies: `bun install`
 4. Open in VS Code
 5. Press F5 to launch Extension Development Host
-6. Test with your favorite Linux music player
 
 ### Building
 
@@ -416,11 +445,14 @@ bun run build-vsix
 vs-music/
 ├── src/
 │   ├── extension.ts              # Extension entry point
-│   ├── linux/
+│   ├── windows/                  # Windows-specific implementation
+│   │   ├── index.ts              # Windows music controller
+│   │   └── windows-helper/       # C# helper for SMTC integration
+│   ├── linux/                    # Linux-specific implementation
 │   │   ├── index.ts              # Linux music controller
 │   │   ├── musicService.ts       # MPRIS/playerctl integration
 │   │   └── utils/
-│   │       ├── artworkUtil.ts    # Smart artwork caching (v0.1.7)
+│   │       ├── artworkUtil.ts    # Smart artwork caching
 │   │       └── playerctl.ts      # Playerctl wrapper
 │   └── common/
 │       └── ui/
@@ -433,13 +465,19 @@ vs-music/
 │                   └── js/
 │                       └── utils/
 │                           └── musicUI.js   # Progressive loading
-├── ARTWORK_IMPROVEMENTS.md      # Technical documentation (v0.1.7)
+├── ARTWORK_IMPROVEMENTS.md      # Technical documentation
 └── package.json
 ```
 
-### Technical Details (v0.1.7)
+### Technical Details
 
-The artwork system has been completely overhauled:
+The extension uses a platform-agnostic architecture:
+
+- **Windows**: Uses a C# helper executable (`QuazaarMedia.exe`) to interface with the `Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager` API.
+- **Linux**: Uses `playerctl` to interface with MPRIS-compatible players.
+- **Common**: Shared UI and logic for the webview and status bar.
+
+See [ARTWORK_IMPROVEMENTS.md](ARTWORK_IMPROVEMENTS.md) for complete technical documentation on the artwork system
 
 - **Single Source of Truth**: `ArtworkUtil` class handles all artwork operations
 - **LRU Cache**: Least Recently Used eviction with size limits

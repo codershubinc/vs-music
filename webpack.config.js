@@ -69,6 +69,7 @@ const extensionConfig = {
         },
         // Copy QuazaarMedia.exe
         {
+          //build:windows 
           from: 'src/windows/QuazaarMedia.exe',
           to: 'src/windows/QuazaarMedia.exe',
         }

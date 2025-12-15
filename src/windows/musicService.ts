@@ -18,12 +18,19 @@ export class WindowsMusicController implements IMusicController {
     }
 
     playPause(): Promise<Boolean | undefined> {
+        console.log("Toggle the play pause");
+        handleWinMessage(`{"Action":"play_pause"}`, this.context, this.webview);
+
         return Promise.resolve(true);
     }
     next(): Promise<Boolean | undefined> {
+        console.log("Toggle the next");
+        handleWinMessage(`{"Action":"next"}`, this.context, this.webview);
         return Promise.resolve(true);
     }
     previous(): Promise<Boolean | undefined> {
+        console.log("Toggle the prev");
+        handleWinMessage(`{"Action":"prev"}`, this.context, this.webview);
         return Promise.resolve(true);
     }
     getCurrentTrack(): Promise<TrackInfo | null> {
