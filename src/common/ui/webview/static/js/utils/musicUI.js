@@ -67,7 +67,7 @@ let lastTitle = '';
 let backgroundOverlay = null;
 
 function updateArtwork(artworkUri, title) {
-    console.log("Title current ::", title, "Prev  ::", lastTitle);
+    // console.log("Title current ::", title, "Prev  ::", lastTitle);
 
 
     if (lastTitle === title) return console.log("Artwork unchanged, skipping update");
