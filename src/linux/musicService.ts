@@ -15,7 +15,6 @@ export interface TrackInfo {
 export class LinuxMusicService {
     private updateInterval: NodeJS.Timeout | null = null;
     private currentTrack: TrackInfo | null = null;
-    private onTrackChangedCallback?: (track: TrackInfo | null) => void;
     private onPositionChangedCallback?: (position: number) => void;
     private isPlayerctlAvailable = false;
     private extensionContext: vscode.ExtensionContext;
@@ -33,7 +32,6 @@ export class LinuxMusicService {
 
     public async initialize() {
         await this.checkPlayerctlAvailability();
-        this.startPolling();
     }
 
     private async checkPlayerctlAvailability(): Promise<void> {
@@ -56,32 +54,6 @@ export class LinuxMusicService {
         });
     }
 
-    private startPolling() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-        }
-
-        this.updateInterval = setInterval(async () => {
-            try {
-                const track = await this.getCurrentTrack();
-
-                if (this.hasTrackChanged(track)) {
-                    this.currentTrack = track;
-
-                    // Artwork will be processed by the controller layer
-                    // No need to download here - just pass the URL
-
-                    this.onTrackChangedCallback?.(track);
-                }
-            } catch (error) {
-                // Track changed to null or error occurred
-                if (this.currentTrack !== null) {
-                    this.currentTrack = null;
-                    this.onTrackChangedCallback?.(null);
-                }
-            }
-        }, 1000);
-    }
 
     private hasTrackChanged(newTrack: TrackInfo | null): boolean {
         if (!this.currentTrack && !newTrack) {
@@ -261,7 +233,6 @@ export class LinuxMusicService {
 
     // Event handlers
     public onTrackChanged(callback: (track: TrackInfo | null) => void) {
-        this.onTrackChangedCallback = callback;
     }
 
     public onPositionChanged(callback: (position: number) => void) {

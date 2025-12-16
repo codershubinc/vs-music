@@ -135,6 +135,9 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
             const trackInfo = await this._controller?.getCurrentTrack();
             const currentPosition = await this._controller?.getPosition();
 
+            if (process.platform === 'win32') {
+                return;
+            }
             // Handle no music playing state
             if (!trackInfo || !trackInfo.title) {
                 this._view.webview.postMessage({

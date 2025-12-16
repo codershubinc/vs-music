@@ -1,11 +1,8 @@
 import * as vscode from 'vscode';
-import { PlayerFunctions, TrackInfo, IMusicController } from "../common/models/models";
-import { handleWinMessage, winHelper, startHelper } from "./windowsHelper";
+import { TrackInfo, IMusicController } from "../common/models/models";
+import { handleWinMessage, startHelper } from "./windowsHelper";
 
 export class WindowsMusicController implements IMusicController {
-    private updateInterval: NodeJS.Timeout | null = null;
-    private currentTrack: TrackInfo | null = null;
-    private onTrackChangedCallback: ((track: TrackInfo | null) => void) | null = null;
     private context: vscode.ExtensionContext | undefined;
     private webview: vscode.Webview | undefined;
 
