@@ -152,6 +152,16 @@
           "type": "boolean",
           "default": false,
           "description": "Show progress bar in music panel"
+        },
+        "music.theme": {
+          "type": "string",
+          "enum": [
+            "modern",
+            "compact",
+            "classic"
+          ],
+          "default": "modern",
+          "description": "Select the theme for the music player UI"
         }
       }
     }

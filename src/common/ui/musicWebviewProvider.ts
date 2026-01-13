@@ -66,6 +66,17 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
             this.startPeriodicUpdates();
             this.updateWebview();
         }
+
+        // Listen for configuration changes to update theme
+        this._context.subscriptions.push(
+            vscode.workspace.onDidChangeConfiguration(e => {
+                if (e.affectsConfiguration('music.theme') && this._view) {
+                    console.log('🎨 Theme changed, reloading webview...');
+                    this._view.webview.html = this._getHtml();
+                    this.updateWebview();
+                }
+            })
+        );
     }
 
     // Handle user interactions from webview (play/pause, next, previous buttons)
@@ -203,23 +214,48 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     // Load and process HTML content with proper webview URIs for CSS/JS files
     private _getHtml(): string {
         try {
-            // Try packaged extension paths first (dist/), fallback to src/ for development
-            let htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'musicPlayer.html');
-            let cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'static', 'css', 'musicPlayer.css');
-            let jsPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'static', 'js', 'utils', 'musicPlayer.js');
+            const config = vscode.workspace.getConfiguration('music');
+            const theme = config.get<string>('theme', 'modern');
 
-            if (!fs.existsSync(htmlPath)) {
-                console.log('📁 Dist files not found, using development paths');
-                htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.html');
-                cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.css');
-                jsPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.js');
+            let htmlPath: string;
+            let cssPath: string;
+            const jsPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'static', 'js', 'utils', 'musicPlayer.js');
+            const jsPathDev = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'static', 'js', 'utils', 'musicPlayer.js');
+
+            // Determine paths based on theme
+            if (theme === 'compact') {
+                htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'themes', 'og-compact', 'musicPlayer.html');
+                cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'themes', 'og-compact', 'musicPlayer.css');
+            } else if (theme === 'classic') {
+                htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'musicPlayer.html');
+                cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'static', 'css', 'musicPlayer.css');
+            } else {
+                // Default to modern
+                htmlPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'themes', 'modern', 'musicPlayer.html');
+                cssPath = path.join(this._context.extensionPath, 'dist', 'src', 'common', 'ui', 'webview', 'themes', 'modern', 'musicPlayer.css');
             }
 
+            // Fallback to dev paths if dist files don't exist
+            if (!fs.existsSync(htmlPath)) {
+                console.log('📁 Dist files not found, using development paths');
+                if (theme === 'compact') {
+                    htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'themes', 'og-compact', 'musicPlayer.html');
+                    cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'themes', 'og-compact', 'musicPlayer.css');
+                } else if (theme === 'classic') {
+                    htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.html');
+                    cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'static', 'css', 'musicPlayer.css');
+                } else {
+                    htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'themes', 'modern', 'musicPlayer.html');
+                    cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'themes', 'modern', 'musicPlayer.css');
+                }
+            }
+
+            let finalJsPath = fs.existsSync(jsPath) ? jsPath : jsPathDev;
             let htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
             // Convert file paths to webview-compatible URIs
             const cssUri = this._view?.webview.asWebviewUri(vscode.Uri.file(cssPath));
-            const jsUri = this._view?.webview.asWebviewUri(vscode.Uri.file(jsPath));
+            const jsUri = this._view?.webview.asWebviewUri(vscode.Uri.file(finalJsPath));
 
             // Replace placeholders with actual URIs
             htmlContent = htmlContent.replace(/\{\{\s*cssUri\s*\}\}/g, cssUri ? cssUri.toString() : '');

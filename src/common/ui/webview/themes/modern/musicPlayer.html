@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src vscode-resource: 'unsafe-inline'; script-src vscode-resource: 'unsafe-inline'; img-src vscode-resource: data: https:;">
+    <title>VS Music Player</title>
+    <link rel="stylesheet" href="{{cssUri}}">
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="background-blur" id="bg-blur"></div>
+
+        <div id="no-music" class="state-container">
+            <div class="icon-large">🎵</div>
+            <h2>Ready to Play</h2>
+            <p>Open Spotify, VLC, or any media player</p>
+        </div>
+
+        <div id="music-info" class="state-container hidden">
+            <div class="album-art-container">
+                <div id="album-art" class="album-art">
+                    <div class="placeholder-art">🎵</div>
+                </div>
+                <div id="status-indicator" class="status-badge">
+                    <span>▶</span>
+                </div>
+            </div>
+
+            <div class="track-info">
+                <div id="track-title" class="title">Loading...</div>
+                <div id="track-artist" class="artist">Please wait...</div>
+                <div id="track-album" class="album">Initializing...</div>
+            </div>
+
+            <div class="progress-section">
+                <div class="time-labels">
+                    <span id="current-time">0:00</span>
+                    <span id="total-time">0:00</span>
+                </div>
+                <div id="progress-container" class="progress-track">
+                    <div id="progress-bar" class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="prev-btn" class="control-btn secondary" title="Previous">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+                    </svg>
+                </button>
+                <button id="play-pause-btn" class="control-btn primary" title="Play/Pause">
+                    <svg viewBox="0 0 24 24" width="32" height="32">
+                        <path fill="currentColor" d="M8 5v14l11-7z" />
+                    </svg>
+                </button>
+                <button id="next-btn" class="control-btn secondary" title="Next">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="{{jsUri}}"></script>
+</body>
+
+</html>
