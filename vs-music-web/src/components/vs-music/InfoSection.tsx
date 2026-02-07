@@ -32,16 +32,16 @@ export default function InfoSection({ ghStats }: { ghStats: GitHubStats }) {
     return (
         <section className="py-24 border-y border-[#1a1a1a] bg-[#0a0a0a] relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-[#0a0a0a] to-[#0a0a0a] opacity-50"></div>
-            
+
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <div className="grid md:grid-cols-2 gap-16 items-center">
                     <div>
                         <h2 className="text-3xl font-bold text-white mb-6">Music that respects your resources.</h2>
                         <p className="text-[#888] text-lg leading-relaxed mb-8">
-                            Modern music players are bloated web apps wrapped in Electron. 
+                            Modern music players are bloated web apps wrapped in Electron.
                             VS Music is built to be invisible until you need it, sipping resources while delivering high-quality audio playback directly from your local drive.
                         </p>
-                        
+
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                             {stats.map((stat, i) => (
                                 <div key={i} className="space-y-2">
@@ -55,7 +55,7 @@ export default function InfoSection({ ghStats }: { ghStats: GitHubStats }) {
                             ))}
                         </div>
                     </div>
-                    
+
                     <div className="relative">
                         <div className="absolute -inset-4 bg-linear-to-r from-[#007acc] to-[#005a9e] opacity-20 blur-2xl rounded-2xl"></div>
                         <div className="relative bg-[#111] border border-[#222] rounded-xl p-8 space-y-6">
