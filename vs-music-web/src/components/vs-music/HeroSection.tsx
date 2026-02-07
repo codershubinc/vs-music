@@ -17,7 +17,7 @@ export default function HeroSection({ installCount, ghStats, gitRepoUrl }: HeroS
     return (
         <section className="pt-40 pb-20 px-6 relative">
             {/* VS Code Glow - A massive blue spotlight behind the text */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#007acc] opacity-5 blur-[150px] -z-10 pointer-events-none"></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-125 bg-[#007acc] opacity-5 blur-[150px] -z-10 pointer-events-none"></div>
 
             <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
                 {/* LEFT: Content */}

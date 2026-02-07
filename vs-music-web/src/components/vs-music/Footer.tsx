@@ -61,7 +61,7 @@ export default function Footer() {
                             <a href="https://twitter.com/codershubinc" target="_blank" className="p-2 rounded-full bg-white/5 text-[#888] hover:bg-[#1DA1F2] hover:text-white transition-all">
                                 <Twitter size={18} />
                             </a>
-                            <a href="mailto:swapnil@codershubinc.com" className="p-2 rounded-full bg-white/5 text-[#888] hover:bg-white hover:text-black transition-all">
+                            <a href="mailto:ingleswapnil2004@gmail.com" className="p-2 rounded-full bg-white/5 text-[#888] hover:bg-white hover:text-black transition-all">
                                 <Mail size={18} />
                             </a>
                         </div>
@@ -70,11 +70,11 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#666] font-mono">
-                    <p>&copy; {new Date().getFullYear()} <a href="https://codershubinc.com" target="_blank" className="hover:text-[#007acc] transition-colors">CodersHubInc</a>. Deployed on Linux.</p>
+                    <p>&copy; {new Date().getFullYear()} <a href="https://codershubinc.com" target="_blank" className="hover:text-[#007acc] transition-colors">CodersHubInc</a> </p>
                     <div className="flex items-center gap-1">
                         <span>Made with</span>
                         <Heart size={10} className="text-red-500 fill-red-500" />
-                        <span>in Panvel, India</span>
+                        <span>By Swapnil Ingle</span>
                     </div>
                 </div>
             </div>
