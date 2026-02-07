@@ -4,6 +4,7 @@ import { getGitHubStats } from './github-stats';
 import BackgroundGrid from '@/components/vs-music/BackgroundGrid';
 import NavigationBar from '@/components/vs-music/NavigationBar';
 import HeroSection from '@/components/vs-music/HeroSection';
+import InfoSection from '@/components/vs-music/InfoSection';
 import FeatureGrid from '@/components/vs-music/FeatureGrid';
 import Footer from '@/components/vs-music/Footer';
 
@@ -19,6 +20,8 @@ export default async function VSMusicPage() {
       <BackgroundGrid />
       <NavigationBar ghStats={ghStats} gitRepoUrl={gitRepoUrl} />
       <HeroSection installCount={installCount} ghStats={ghStats} gitRepoUrl={gitRepoUrl} />
+
+      <InfoSection ghStats={ghStats} />
       <FeatureGrid />
       <Footer />
     </main>
