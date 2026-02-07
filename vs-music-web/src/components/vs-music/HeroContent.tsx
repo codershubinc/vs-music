@@ -25,7 +25,7 @@ export default function HeroContent({ installCount, stars, gitRepoUrl }: HeroCon
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
                 Code to the <br />
                 {/* VS Code Signature Gradient */}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#007acc] to-[#0e639c]">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-[#007acc] to-[#0e639c]">
                     Rhythm.
                 </span>
             </h1>

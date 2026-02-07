@@ -4,7 +4,7 @@ export default function HeroImage() {
     return (
         <div className="relative lg:scale-110 lg:translate-x-8 w-auto h-auto">
             {/* Glow Effect Behind */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[700px] bg-gradient-to-br from-[#007acc]/15 to-[#0e639c]/10 blur-[120px] -z-10"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-175 bg-linear-to-br from-[#007acc]/15 to-[#0e639c]/10 blur-[120px] -z-10"></div>
 
             {/* Image with Fade Mask */}
             <div className="relative">
@@ -23,7 +23,7 @@ export default function HeroImage() {
                     priority
                 />
                 {/* Subtle overlay for integration */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-50 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-[#0a0a0a] via-transparent to-transparent opacity-50 pointer-events-none"></div>
             </div>
         </div>
     );
