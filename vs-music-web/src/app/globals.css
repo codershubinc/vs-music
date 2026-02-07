@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: rgb(10 10 10);
+  --color-foreground: rgb(250 250 250);
+}
+
+:root {
+  --background: 10 10 10;
+  --foreground: 250 250 250;
+  --card: 10 10 10;
+  --card-foreground: 250 250 250;
+  --popover: 10 10 10;
+  --popover-foreground: 250 250 250;
+  --primary: 250 250 250;
+  --primary-foreground: 10 10 10;
+  --secondary: 39 39 42;
+  --secondary-foreground: 250 250 250;
+  --muted: 39 39 42;
+  --muted-foreground: 161 161 170;
+  --accent: 39 39 42;
+  --accent-foreground: 250 250 250;
+  --destructive: 127 29 29;
+  --destructive-foreground: 250 250 250;
+  --border: 39 39 42;
+  --input: 39 39 42;
+  --ring: 250 250 250;
+  --radius: 0.5rem;
+}
+
+body {
+  background-color: rgb(var(--background));
+  color: rgb(var(--foreground));
+}
+
+/* Custom Scrollbar for Terminal Feel */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0f0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
