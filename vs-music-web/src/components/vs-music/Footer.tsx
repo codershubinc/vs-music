@@ -11,12 +11,12 @@ export default function Footer() {
 
                     {/* Brand Column */}
                     <div className="md:col-span-2 space-y-4">
-                        <Link href="/" className="flex items-center gap-2 text-white font-bold tracking-tight text-xl group w-fit">
+                        <a href="https://codershubinc.com" target="_blank" className="flex items-center gap-2 text-white font-bold tracking-tight text-xl group w-fit">
                             <div className="p-1.5 rounded bg-white/5 group-hover:bg-[#007acc]/20 transition-colors">
                                 <Terminal size={18} className="text-[#007acc]" />
                             </div>
                             <span>CodersHubInc</span>
-                        </Link>
+                        </a>
                         <p className="text-[#888] text-sm leading-relaxed max-w-sm">
                             Building high-performance developer tools and self-hosted infrastructure.
                             Open source by default.
@@ -70,7 +70,7 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#666] font-mono">
-                    <p>&copy; {new Date().getFullYear()} CodersHubInc. Deployed on Linux.</p>
+                    <p>&copy; {new Date().getFullYear()} <a href="https://codershubinc.com" target="_blank" className="hover:text-[#007acc] transition-colors">CodersHubInc</a>. Deployed on Linux.</p>
                     <div className="flex items-center gap-1">
                         <span>Made with</span>
                         <Heart size={10} className="text-red-500 fill-red-500" />
