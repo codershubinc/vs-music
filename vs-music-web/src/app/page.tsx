@@ -6,6 +6,7 @@ import NavigationBar from '@/components/vs-music/NavigationBar';
 import HeroSection from '@/components/vs-music/HeroSection';
 import FeatureGrid from '@/components/vs-music/FeatureGrid';
 import Footer from '@/components/vs-music/Footer';
+import InfoSection from '@/components/vs-music/InfoSection';
 
 export default async function VSMusicPage() {
   const [installCount, ghStats] = await Promise.all([
@@ -19,6 +20,7 @@ export default async function VSMusicPage() {
       <BackgroundGrid />
       <NavigationBar ghStats={ghStats} gitRepoUrl={gitRepoUrl} />
       <HeroSection installCount={installCount} ghStats={ghStats} gitRepoUrl={gitRepoUrl} />
+      <InfoSection ghStats={ghStats} />
       <FeatureGrid />
       <Footer />
     </main>
