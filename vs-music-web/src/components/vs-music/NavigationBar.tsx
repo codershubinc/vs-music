@@ -1,4 +1,4 @@
-import { ArrowLeft, Github } from 'lucide-react';
+import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { StarBadge, VersionBadge } from '@/components/badges';
 import Image from 'next/image';

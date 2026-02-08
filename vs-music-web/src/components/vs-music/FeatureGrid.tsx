@@ -31,7 +31,7 @@ const features: Feature[] = [
 export default function FeatureGrid() {
     return (
         <section className="py-24 px-6 relative">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.01] to-transparent -z-10"></div>
+            <div className="absolute inset-0 bg-linear-to-b from-transparent via-white/1 to-transparent -z-10"></div>
 
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
@@ -42,9 +42,9 @@ export default function FeatureGrid() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {features.map((feature, i) => (
                         <div key={i} className="group relative p-8 rounded-2xl bg-[#0f0f0f] border border-[#1a1a1a] hover:border-[#007acc] transition-all hover:scale-[1.02]">
-                            <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-500`}></div>
+                            <div className={`absolute inset-0 bg-linear-to-br ${feature.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-500`}></div>
                             <div className="relative">
-                                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} opacity-10 flex items-center justify-center mb-6 group-hover:opacity-20 transition-all group-hover:scale-110`}>
+                                <div className={`w-14 h-14 rounded-xl bg-linear-to-br ${feature.color} opacity-10 flex items-center justify-center mb-6 group-hover:opacity-20 transition-all group-hover:scale-110`}>
                                     <feature.icon size={26} className="text-white" />
                                 </div>
                                 <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
