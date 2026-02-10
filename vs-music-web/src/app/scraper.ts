@@ -1,4 +1,3 @@
-
 export async function getInstallCount() {
     try {
         const res = await fetch('https://marketplace.visualstudio.com/items?itemName=codershubinc.music', {

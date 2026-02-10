@@ -1,4 +1,3 @@
-import React from 'react';
 import { getInstallCount } from './scraper';
 import { getGitHubStats } from './github-stats';
 import BackgroundGrid from '@/components/vs-music/BackgroundGrid';
