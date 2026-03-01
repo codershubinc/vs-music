@@ -6,7 +6,7 @@
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow)
 ![Publisher](https://img.shields.io/badge/Publisher-codershubinc-orange)
-![Version](https://img.shields.io/badge/Version-0.2.0-blue)
+![Version](https://vsmusic.codershubinc.com/api/version-badge?format=svg)
 [![wakatime](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/a68f0e8f-e56d-4815-8c99-1e6c2d6a27c8.png)](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/a68f0e8f-e56d-4815-8c99-1e6c2d6a27c8)
 
 A Visual Studio Code extension that displays currently playing music information and provides playback controls directly in your editor. Perfect for Windows & Linux developers who want to stay in their coding flow while managing their music.
