@@ -1,5 +1,6 @@
 # VS Music Extension for VS Code
 
+![Installs](https://vsmusic.codershubinc.com/api/installs-badge?format=png)
 ![VS Music Icon](https://img.shields.io/badge/VS%20Code-Music%20Extension-blue?logo=visual-studio-code)
 ![Windows](https://img.shields.io/badge/Windows-Compatible-blue?logo=windows)
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux)
@@ -216,14 +217,12 @@ playerctl status
 ### Install the Extension
 
 1. **From VS Code Marketplace**:
-
    - Open VS Code
    - Go to Extensions (Ctrl+Shift+X)
    - Search for "VS Music" by **codershubinc**
    - Click Install
 
 2. **From VSIX file**:
-
    - Download the `music-0.1.7.vsix` file from [releases](https://github.com/codershubinc/vs-music/releases)
    - Open VS Code
    - Press Ctrl+Shift+P and type "Extensions: Install from VSIX"
