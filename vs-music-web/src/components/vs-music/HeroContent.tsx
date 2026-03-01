@@ -1,4 +1,5 @@
 import { Download } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import CopyButton from '@/components/CopyButton';
 import { CategoryBadge, InstallsBadge, StarBadge } from '@/components/badges';
@@ -12,6 +13,16 @@ interface HeroContentProps {
 export default function HeroContent({ installCount, stars, gitRepoUrl }: HeroContentProps) {
     return (
         <div className="flex flex-col items-start z-10">
+            <div className="flex items-center gap-3 mb-6">
+                <Image
+                    src="/icon.png"
+                    alt="VS Music icon"
+                    width={48}
+                    height={48}
+                    className="rounded-xl"
+                />
+                <span className="font-mono text-[#888] text-sm">VS Music</span>
+            </div>
             <div className="flex flex-wrap items-center gap-3 mb-8">
                 <CategoryBadge label="VS Code Extension" />
                 {installCount && <InstallsBadge count={installCount} />}

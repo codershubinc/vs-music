@@ -18,8 +18,15 @@ export default function NavigationBar({ ghStats, gitRepoUrl }: NavigationBarProp
     return (
         <nav className="fixed w-full z-50 border-b border-[#1a1a1a]/30 bg-black/20 backdrop-blur-2xl">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                <Link href="https://codershubinc.com/" target='_blank' className="flex items-center gap-2 hover:text-white transition group">
-                    <span className="font-mono text-sm">codershubinc</span>
+                <Link href="/" className="flex items-center gap-2 hover:text-white transition group">
+                    <Image
+                        src="/icon.png"
+                        alt="VS Music"
+                        width={24}
+                        height={24}
+                        className="rounded-md"
+                    />
+                    <span className="font-mono text-sm">VS Music</span>
                 </Link>
                 <div className="flex items-center gap-3 text-sm font-medium">
                     {ghStats.stars !== null && (

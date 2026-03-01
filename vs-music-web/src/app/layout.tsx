@@ -38,7 +38,12 @@ export const metadata: Metadata = {
     images: ["/vs-music-demo-deep.png"],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icon.png", sizes: "128x128", type: "image/png" },
+    ],
+    apple: "/icon.png",
+    shortcut: "/icon.png",
   },
 };
 
