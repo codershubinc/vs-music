@@ -19,6 +19,8 @@ export interface IMusicController {
     previous(): Promise<Boolean | undefined>;
     isAvailable(): boolean;
     getArtworkUri(artUrl: string, webview: vscode.Webview): Promise<string>;
+    /** Called when track or playback state changes. Linux: fires via D-Bus signal. Windows: no-op. */
+    onTrackChanged(callback: () => void): void;
     dispose(): void;
 }
 

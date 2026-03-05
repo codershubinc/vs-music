@@ -1,6 +1,6 @@
 {
   "name": "music",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "codershubinc",
   "author": "Swapnil Ingle",
   "license": "MIT",
@@ -183,6 +183,7 @@
     "publish:all": "bun run publish:win && bun run publish:linux"
   },
   "dependencies": {
+    "dbus-next": "^0.10.2",
     "uuid": "^13.0.0"
   }
 }

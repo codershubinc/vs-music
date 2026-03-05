@@ -1,103 +1,121 @@
-import { spawn } from "child_process";
-import * as vscode from 'vscode';
-import FIND_FILE_PATHS from "../../utils/findFilePaths";
+import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 
-class playerCtrlLinux {
-
-    private isPlayerCtrlAvailableFlag: boolean | null = null;
-    private extensionContext: vscode.ExtensionContext | null = null;
-
-    constructor() {
-        this.isPlyerCtrlAvailable();
-    }
-
-    // Method to set the extension context
-    setExtensionContext(context: vscode.ExtensionContext) {
-        this.extensionContext = context;
-    }
-
-    // This class will handle communication with Playerctl 
-    async isPlyerCtrlAvailable(): Promise<boolean> {
-        // Check if playerctl is installed on the system
-        const playerCtrl = spawn("playerctl", ["--version"]);
-        console.log("Checking if playerctl is available on the system...");
-        playerCtrl.stdout.on("data", (data) => {
-            console.log("Info got from playerctl --version command:" + data);
-        });
-        const isAvailable: boolean = await new Promise((resolve) => {
-            playerCtrl.on("error", () => resolve(false));
-            playerCtrl.on("exit", (code) => resolve(code === 0));
-        });
-        this.isPlayerCtrlAvailableFlag = isAvailable;
-        return isAvailable;
-    }
-
-
-    async getCurrentTrackInfo(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            if (this.isPlayerCtrlAvailableFlag === false) {
-                reject("playerctl is not available on this system.");
-                return;
-            }
-            const playerCtrl = spawn("playerctl", [
-                'metadata',
-                '--format',
-                '{{title}}|{{mpris:artUrl }}|{{artist}}|{{album}}|{{duration(position)}}|{{duration(mpris:length)}}|{{status}}'
-            ]);
-            let trackInfo = "";
-            playerCtrl.stdout.on("data", (data) => {
-                trackInfo += data.toString();
-            });
-            playerCtrl.stderr.on("data", (data) => {
-                console.error(`Error: ${data}`);
-            });
-            playerCtrl.on("close", (code) => {
-                if (code === 0) {
-                    resolve(trackInfo.trim());
-                } else {
-                    reject(`playerctl process exited with code ${code}`);
-                }
-            });
-        });
-    }
-    async testPy() {
-        const pythonProcess = spawn('python3', ['-c', 'print("Hello from Python")']);
-        pythonProcess.stdout.on('data', (data) => {
-            console.log(`Python Output: ${data}`);
-        });
-        pythonProcess.stderr.on('data', (data) => {
-            console.error(`Python Error: ${data}`);
-        });
-        pythonProcess.on('close', (code) => {
-            console.log(`Python process exited with code ${code}`);
-        });
-
-        let pythonFilePath = FIND_FILE_PATHS.getPath(
-            this.extensionContext,
-            'test.py'
-        )
-
-        // Run the Python file
-        const runPyFile = spawn('python3', [pythonFilePath]);
-        runPyFile.stdout.on('data', (data) => {
-            console.log(`Output from test.py: ${data}`);
-        });
-        runPyFile.stderr.on('data', (data) => {
-            console.error(`Error from test.py: ${data}`);
-        });
-        runPyFile.on('close', (code) => {
-            console.log(`test.py process exited with code ${code}`);
-        });
-    }
-
-
-    dispose() {
-        // Clean up resources if needed
-    }
-
-
+export interface MprisTrackState {
+    title: string;
+    artist: string;
+    album: string;
+    artUrl: string;
+    positionSecs: number;
+    durationSecs: number;
+    status: 'playing' | 'paused' | 'stopped';
+    player: string;
 }
 
+const EMPTY_STATE: MprisTrackState = {
+    title: '', artist: '', album: '', artUrl: '',
+    positionSecs: 0, durationSecs: 0, status: 'stopped', player: '',
+};
 
-const PLAYER_CONTROLLER_LINUX = new playerCtrlLinux();
+class PlayerCtrlLinux {
+    private _process: ChildProcessWithoutNullStreams | null = null;
+    private state: MprisTrackState = { ...EMPTY_STATE };
+    private onChange: (() => void) | null = null;
+    private retryTimer: NodeJS.Timeout | null = null;
+    private isDisposed = false;
+
+    constructor() {
+        this.startProcess();
+    }
+
+    private startProcess() {
+        if (this.isDisposed) return;
+        if (this._process) this.killProcess();
+
+        // We use a custom delimiter ";|;" to avoid breaking on quotes in song titles
+        const format = '{{status}};|;{{xesam:title}};|;{{xesam:artist}};|;{{xesam:album}};|;{{mpris:artUrl}};|;{{mpris:length}};|;{{position}}';
+
+        // --follow: Blocks and waits for changes (0% CPU)
+        // --player: Prioritize common players
+        this._process = spawn('playerctl', ['metadata', '--format', format, '--follow']);
+
+        this._process.stdout.on('data', (data) => {
+            const lines = data.toString().split('\n');
+            for (const line of lines) {
+                if (line.trim()) this.parseLine(line);
+            }
+        });
+
+        this._process.stderr.on('data', (data) => {
+            // "No players found" is common, ignore it
+            // console.log('Playerctl stderr:', data.toString()); 
+        });
+
+        this._process.on('close', (code) => {
+            if (!this.isDisposed) {
+                // If playerctl exits (e.g. no player running), retry in 2 seconds
+                this.retryTimer = setTimeout(() => this.startProcess(), 2000);
+            }
+        });
+    }
+
+    private parseLine(line: string) {
+        try {
+            const parts = line.split(';|;');
+            if (parts.length < 6) return;
+
+            // Update state
+            this.state.status = (parts[0].toLowerCase() as any) || 'stopped';
+            this.state.title = parts[1] || '';
+            this.state.artist = parts[2] || '';
+            this.state.album = parts[3] || '';
+            this.state.artUrl = parts[4] || '';
+
+            // Convert microseconds to seconds
+            const durationMicros = parseInt(parts[5] || '0');
+            this.state.durationSecs = Math.floor(durationMicros / 1_000_000);
+
+            // Notify UI
+            this.onChange?.();
+        } catch (e) {
+            console.error('Failed to parse playerctl output:', e);
+        }
+    }
+
+    private killProcess() {
+        if (this._process) {
+            this._process.kill();
+            this._process = null;
+        }
+        if (this.retryTimer) {
+            clearTimeout(this.retryTimer);
+            this.retryTimer = null;
+        }
+    }
+
+    // --- Public API ---
+
+    get isConnected(): boolean {
+        return this._process !== null && !this.isDisposed;
+    }
+
+    getState(): Readonly<MprisTrackState> {
+        return this.state;
+    }
+
+    onTrackChange(cb: () => void) {
+        this.onChange = cb;
+    }
+
+    // Control commands spawn a temporary process (fire and forget)
+    playPause() { spawn('playerctl', ['play-pause']); }
+    next() { spawn('playerctl', ['next']); }
+    previous() { spawn('playerctl', ['previous']); }
+
+    dispose() {
+        this.isDisposed = true;
+        this.killProcess();
+    }
+}
+
+const PLAYER_CONTROLLER_LINUX = new PlayerCtrlLinux();
 export default PLAYER_CONTROLLER_LINUX;

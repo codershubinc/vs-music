@@ -43,6 +43,8 @@ export class WindowsMusicController implements IMusicController {
     async getArtworkUri(artUrl: string, webview: vscode.Webview): Promise<string> {
         return '';
     }
+    onTrackChanged(_callback: () => void) {
+    }
     dispose() {
         // cleanup
     }

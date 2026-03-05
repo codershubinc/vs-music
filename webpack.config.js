@@ -28,8 +28,8 @@ module.exports = (env, argv) => {
       clean: true
     },
     externals: {
-      vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-      // modules added here also need to be added in the .vscodeignore file
+      vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+      x11: 'commonjs x11' // optional dependency of dbus-next; not needed at runtime on standard DBus sockets
     },
     resolve: {
       // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader

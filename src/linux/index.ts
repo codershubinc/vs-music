@@ -23,7 +23,7 @@ import { IMusicController } from '../common/models/models';
  * ------------------------
  * Linux uses MPRIS (D-Bus protocol) to communicate with media players:
  * - Spotify, VLC, Rhythmbox, Audacious, etc. all support MPRIS
- * - We use 'playerctl' command-line tool to interact with MPRIS
+ * - We use 'dbus-next' to communicate directly with MPRIS over D-Bus
  * - Provides standardized interface for play/pause/next/prev/metadata
  * 
  * CONTROLLER RESPONSIBILITIES:
@@ -124,10 +124,17 @@ export class LinuxMusicController implements IMusicController {
     }
 
     /**
+     * Register a callback that fires whenever track/playback state changes (D-Bus signal, zero polling)
+     */
+    onTrackChanged(callback: () => void) {
+        this.musicService.onTrackChanged(() => callback());
+    }
+
+    /**
      * Dispose resources
      */
     dispose() {
-        // Clean up resources if needed
+        this.musicService.dispose();
     }
 }
 
