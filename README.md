@@ -1,6 +1,6 @@
 # VS Music Extension for VS Code
 
-![Installs](https://vsmusic.codershubinc.com/api/installs-badge?format=svg)
+![Installs](https://vsmusic.codershubinc.com/api/installs-badge?format=png)
 ![VS Music Icon](https://img.shields.io/badge/VS%20Code-Music%20Extension-blue?logo=visual-studio-code)
 ![Windows](https://img.shields.io/badge/Windows-Compatible-blue?logo=windows)
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux)
@@ -64,3 +64,62 @@ The extension includes a lightweight helper utility that automatically communica
 Run this in your terminal to ensure it detects your player:
 ```bash
 playerctl status
+
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### 💡 Common Fixes (Read First!)
+
+* **Linux:** 90% of issues are solved by installing `playerctl` and restarting VS Code.
+* **Windows:** Ensure your music player (Spotify/Browser) is actually playing audio. Windows puts inactive players to "sleep" to save resources.
+
+### 🪟 Windows Specific
+
+* **Extension doesn't detect music:**
+* Make sure the song is playing.
+* Check if you can see the music in your Windows Notification Center / Lock Screen. If Windows can't see it, neither can we!
+* **Browser Users:** Ensure "Hardware Media Key Handling" is enabled in your browser settings.
+
+
+
+### 🐧 Linux Specific
+
+* **"playerctl not available" error:**
+* Run `playerctl --version` in your terminal. If this command fails, the extension will not work.
+
+
+* **Artwork not loading:**
+* The extension caches artwork (limit 100MB/200 images) to prevent bloat.
+* Supported formats: PNG, JPEG, WebP.
+* Try restarting VS Code to clear the cache.
+
+
+
+---
+
+## ⚙️ Technical Details
+
+This extension uses a platform-agnostic architecture to ensure speed and stability:
+
+* **Windows:** Uses a custom C# helper (`QuazaarMedia.exe`) to interface with `Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager`.
+* **Linux:** Wraps `playerctl` commands to interface with MPRIS-compatible players.
+* **Performance:** Implements intelligent caching and exponential backoff strategies to ensure VS Code remains lightweight.
+
+---
+
+## 👨‍💻 Author & Connect
+
+**Swapnil Ingle** ([@codershubinc](https://github.com/codershubinc))
+
+### 📬 Project Links
+
+* **[Report a Bug](https://github.com/codershubinc/vs-music/issues)**
+* **[View Source Code](https://github.com/codershubinc/vs-music)**
+* **[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=codershubinc.music)**
+
+---
+
+### Enjoy coding with your favorite tunes! 🎶 
