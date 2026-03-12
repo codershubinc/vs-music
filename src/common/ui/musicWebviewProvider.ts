@@ -91,11 +91,11 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         if (this._updateTimer) { return; }
 
         if (process.platform === 'linux') {
-            // Signal-driven: fires only when track/status actually changes
+
             this._controller?.onTrackChanged(() => {
                 this.updateWebview();
             });
-            // Dummy timer just to keep the "running" state valid
+
             this._updateTimer = setInterval(() => { }, 2_147_483_647);
         } else {
             this._updateTimer = setInterval(() => { this.updateWebview(); }, 1000);

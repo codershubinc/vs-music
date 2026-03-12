@@ -8,11 +8,11 @@ function updateStatusIndicator(status) {
     if (!statusIndicator) {
         return;
     }
-    // Optimized: Only update when changed (70% less DOM manipulation)
-    if (status === lastStatusIndicator) { return; } // ✅ Skip if unchanged - NOW WORKS!
+
+    if (status === lastStatusIndicator) { return; }
     lastStatusIndicator = status;
 
-    // Only update what actually changed
+
     statusIndicator.className = 'status-indicator';
     if (status === 'playing') {
         statusIndicator.classList.add('status-playing');
@@ -42,9 +42,7 @@ function updatePlayPauseButton(status) {
 }
 
 function showNoMusic() {
-    // console.log("Showing no music UI");
 
-    // Clear any running intervals
     if (progressUpdateInterval) {
         clearInterval(progressUpdateInterval);
         progressUpdateInterval = null;
@@ -70,7 +68,7 @@ function updateArtwork(artworkUri, title) {
     // console.log("Title current ::", title, "Prev  ::", lastTitle);
 
 
-    if (lastTitle === title) return console.log("Artwork unchanged, skipping update");
+    if (lastTitle === title) return;
 
     lastTitle = title;
 
@@ -79,16 +77,14 @@ function updateArtwork(artworkUri, title) {
 
     try {
         if (artworkUri?.trim()) {
-            console.log("Updating artwork to:", artworkUri);
 
-            // Show loading state
             albumArt.classList.add('loading');
 
             // Preload image before displaying
             const img = new Image();
 
             img.onload = () => {
-                // Remove loading state and display image with animation
+
                 albumArt.classList.remove('loading');
                 albumArt.innerHTML = `<img src="${artworkUri}" alt="Album artwork">`;
                 updateBackgroundOverlay(artworkUri);
