@@ -22,26 +22,29 @@ class PlayerCtrlLinux {
     private onChange: (() => void) | null = null;
     private retryTimer: NodeJS.Timeout | null = null;
     private isDisposed = false;
+    private stdoutBuffer = '';
 
     constructor() {
         this.startProcess();
     }
 
     private startProcess() {
-        if (this.isDisposed) return;
-        if (this._process) this.killProcess();
+        if (this.isDisposed) { return; };
+        if (this._process) { this.killProcess(); }
 
-        // We use a custom delimiter ";|;" to avoid breaking on quotes in song titles
-        const format = '{{status}};|;{{xesam:title}};|;{{xesam:artist}};|;{{xesam:album}};|;{{mpris:artUrl}};|;{{mpris:length}};|;{{position}}';
+        // We use a custom delimiter "~~DELIM~~" to avoid breaking on quotes in song titles
+        const format = '{{status}}~~DELIM~~{{xesam:title}}~~DELIM~~{{xesam:artist}}~~DELIM~~{{xesam:album}}~~DELIM~~{{mpris:artUrl}}~~DELIM~~{{mpris:length}}';
 
-        // --follow: Blocks and waits for changes (0% CPU)
-        // --player: Prioritize common players
+
         this._process = spawn('playerctl', ['metadata', '--format', format, '--follow']);
 
         this._process.stdout.on('data', (data) => {
-            const lines = data.toString().split('\n');
-            for (const line of lines) {
-                if (line.trim()) this.parseLine(line);
+            this.stdoutBuffer += data.toString();
+            let newlineIndex;
+            while ((newlineIndex = this.stdoutBuffer.indexOf('\n')) >= 0) {
+                const line = this.stdoutBuffer.slice(0, newlineIndex);
+                this.stdoutBuffer = this.stdoutBuffer.slice(newlineIndex + 1);
+                if (line.trim()) { this.parseLine(line); }
             }
         });
 
@@ -60,8 +63,8 @@ class PlayerCtrlLinux {
 
     private parseLine(line: string) {
         try {
-            const parts = line.split(';|;');
-            if (parts.length < 6) return;
+            const parts = line.split('~~DELIM~~');
+            if (parts.length < 6) { return; }
 
             // Update state
             this.state.status = (parts[0].toLowerCase() as any) || 'stopped';

@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import { ArtworkUtil } from '../../linux/utils/artworkUtil';
 import { IMusicController } from '../models/models';
 import { MusicControllerFactory } from '../musicControllerFactory';
+import { log } from 'console';
 
 export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'vsMusicPlayer';
@@ -114,10 +115,13 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
 
         try {
             const trackInfo = await this._controller?.getCurrentTrack();
+            console.log("Updating track info ", trackInfo);
+
 
             if (process.platform === 'win32') { return; }
 
             if (!trackInfo || !trackInfo.title) {
+                log('No track info available, clearing webview');
                 this._view.webview.postMessage({ command: 'updateTrack', track: null });
                 return;
             }
@@ -132,39 +136,52 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                 artworkDataUri = this._lastArtworkDataUri;
             } else {
                 // OPTIMIZATION: Async file reading
-                try {
-                    const localPath = await ArtworkUtil.downloadArtwork(artUrl);
-                    if (localPath) {
-                        const fileUri = vscode.Uri.file(localPath);
-                        webviewArtworkUri = this._view!.webview.asWebviewUri(fileUri).toString();
+                // try {
+                //     const localPath = await ArtworkUtil.downloadArtwork(artUrl);
+                //     if (localPath) {
+                //         const fileUri = vscode.Uri.file(localPath);
+                //         webviewArtworkUri = this._view!.webview.asWebviewUri(fileUri).toString();
 
-                        try {
-                            // CHANGE: fs.promises.readFile (Async) instead of readFileSync
-                            const buffer = await fs.promises.readFile(localPath);
-                            const ext = path.extname(localPath).toLowerCase();
-                            let mime = 'image/jpeg';
-                            if (ext === '.png') { mime = 'image/png'; }
-                            else if (ext === '.webp') { mime = 'image/webp'; }
-                            artworkDataUri = `data:${mime};base64,${buffer.toString('base64')}`;
-                        } catch (e) {
-                            console.warn('Failed to read artwork file:', e);
-                        }
-                    }
-                } catch (e) {
-                    console.warn('Artwork processing error:', e);
-                }
+                //         try {
+                //             // CHANGE: fs.promises.readFile (Async) instead of readFileSync
+                //             const buffer = await fs.promises.readFile(localPath);
+                //             const ext = path.extname(localPath).toLowerCase();
+                //             let mime = 'image/jpeg';
+                //             if (ext === '.png') { mime = 'image/png'; }
+                //             else if (ext === '.webp') { mime = 'image/webp'; }
+                //             artworkDataUri = `data:${mime};base64,${buffer.toString('base64')}`;
+                //         } catch (e) {
+                //             console.warn('Failed to read artwork file:', e);
+                //         }
+                //     }
+                // } catch (e) {
+                //     console.warn('Artwork processing error:', e);
+                // }
 
                 this._lastArtUrl = artUrl;
                 this._lastWebviewArtUri = webviewArtworkUri;
                 this._lastArtworkDataUri = artworkDataUri;
             }
 
-            this._view.webview.postMessage({
+            // Fix file:// URIs using the webview API
+            let resolvedArtworkUri = trackInfo.artUrl || '';
+            if (resolvedArtworkUri.startsWith('file://')) {
+                try {
+                    const localFileUri = vscode.Uri.parse(resolvedArtworkUri);
+                    resolvedArtworkUri = this._view!.webview.asWebviewUri(localFileUri).toString();
+                } catch (e) {
+                    console.error('Failed to parse file URI:', e);
+                }
+            }
+
+            log('Sending track update to webview with artwork URI:', resolvedArtworkUri);
+            const msgSend = this._view.webview.postMessage({
                 command: 'updateTrack',
                 track: trackInfo,
-                artworkUri: webviewArtworkUri,
+                artworkUri: resolvedArtworkUri,
                 artworkDataUri: artworkDataUri,
             });
+            console.log("Sent updateTrack message, result: ", msgSend);
 
         } catch (error) {
             console.error('Error updating webview:', error);
@@ -179,8 +196,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
 
             if (!fs.existsSync(htmlPath)) {
                 htmlPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.html');
-                cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.css');
-                jsPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'musicPlayer.js');
+                cssPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'static', 'css', 'musicPlayer.css');
+                jsPath = path.join(this._context.extensionPath, 'src', 'common', 'ui', 'webview', 'static', 'js', 'utils', 'musicPlayer.js');
             }
 
             let htmlContent = fs.readFileSync(htmlPath, 'utf8');
@@ -189,6 +206,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
 
             htmlContent = htmlContent.replace(/\{\{\s*cssUri\s*\}\}/g, cssUri ? cssUri.toString() : '');
             htmlContent = htmlContent.replace(/\{\{\s*jsUri\s*\}\}/g, jsUri ? jsUri.toString() : '');
+            const cspSource = this._view?.webview.cspSource || 'vscode-resource:';
+            htmlContent = htmlContent.replace(/\{\{\s*cspSource\s*\}\}/g, cspSource);
 
             return htmlContent;
 

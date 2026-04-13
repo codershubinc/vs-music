@@ -10,6 +10,8 @@ import { showNoMusic, updateArtwork, updatePlayPauseButton, updateStatusIndicato
     // Message listener for extension communication
     window.addEventListener('message', event => {
         const message = event.data;
+        console.log("Got message ", message);
+
 
         switch (message.command) {
             case 'updateTrack':
