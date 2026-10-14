@@ -110,12 +110,12 @@ export class LinuxMusicController implements IMusicController {
 
         try {
             // Delegate to centralized ArtworkUtil
-            const localPath = await ArtworkUtil.downloadArtwork(artUrl);
-            if (localPath) {
-                // Convert file path directly to webview URI
-                const fileUri = vscode.Uri.file(localPath);
-                return webview.asWebviewUri(fileUri).toString();
-            }
+            // const localPath = await ArtworkUtil.downloadArtwork(artUrl);
+            // if (localPath) {
+            //     // Convert file path directly to webview URI
+            //     const fileUri = vscode.Uri.file(localPath);
+            //     return webview.asWebviewUri(fileUri).toString();
+            // }
             return '';
         } catch (error) {
             console.warn('Error processing artwork URI:', error);

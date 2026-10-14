@@ -17,6 +17,7 @@ interface CacheEntry {
  * Utility class for handling music artwork downloads and caching with LRU eviction
  */
 export class ArtworkUtil {
+
     private static artworkCache = new Map<string, CacheEntry>();
     private static readonly MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100MB
     private static readonly MAX_CACHE_ENTRIES = 200;
@@ -55,7 +56,7 @@ export class ArtworkUtil {
 
             // Handle HTTP/HTTPS URLs
             if (artUrl.startsWith('http://') || artUrl.startsWith('https://')) {
-                return this.handleHttpUrl(artUrl);
+                return null; // this.handleHttpUrl(artUrl);   returning null for  debugging
             }
 
             // Skip unsupported URLs

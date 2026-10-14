@@ -136,27 +136,28 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                 artworkDataUri = this._lastArtworkDataUri;
             } else {
                 // OPTIMIZATION: Async file reading
-                // try {
-                //     const localPath = await ArtworkUtil.downloadArtwork(artUrl);
-                //     if (localPath) {
-                //         const fileUri = vscode.Uri.file(localPath);
-                //         webviewArtworkUri = this._view!.webview.asWebviewUri(fileUri).toString();
+                try {
 
-                //         try {
-                //             // CHANGE: fs.promises.readFile (Async) instead of readFileSync
-                //             const buffer = await fs.promises.readFile(localPath);
-                //             const ext = path.extname(localPath).toLowerCase();
-                //             let mime = 'image/jpeg';
-                //             if (ext === '.png') { mime = 'image/png'; }
-                //             else if (ext === '.webp') { mime = 'image/webp'; }
-                //             artworkDataUri = `data:${mime};base64,${buffer.toString('base64')}`;
-                //         } catch (e) {
-                //             console.warn('Failed to read artwork file:', e);
-                //         }
-                //     }
-                // } catch (e) {
-                //     console.warn('Artwork processing error:', e);
-                // }
+                    const localPath = await ArtworkUtil.downloadArtwork(artUrl);
+                    if (localPath) {
+                        const fileUri = vscode.Uri.file(localPath);
+                        webviewArtworkUri = this._view!.webview.asWebviewUri(fileUri).toString();
+
+                        try {
+                            // CHANGE: fs.promises.readFile (Async) instead of readFileSync
+                            const buffer = await fs.promises.readFile(localPath);
+                            const ext = path.extname(localPath).toLowerCase();
+                            let mime = 'image/jpeg';
+                            if (ext === '.png') { mime = 'image/png'; }
+                            else if (ext === '.webp') { mime = 'image/webp'; }
+                            artworkDataUri = `data:${mime};base64,${buffer.toString('base64')}`;
+                        } catch (e) {
+                            console.warn('Failed to read artwork file:', e);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Artwork processing error:', e);
+                }
 
                 this._lastArtUrl = artUrl;
                 this._lastWebviewArtUri = webviewArtworkUri;
@@ -167,8 +168,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
             let resolvedArtworkUri = trackInfo.artUrl || '';
             if (resolvedArtworkUri.startsWith('file://')) {
                 try {
-                    const localFileUri = vscode.Uri.parse(resolvedArtworkUri);
-                    resolvedArtworkUri = this._view!.webview.asWebviewUri(localFileUri).toString();
+                    const localFileUri = vscode.Uri.parse(resolvedArtworkUri); // skipping for now , for debugging
+                    // resolvedArtworkUri = this._view!.webview.asWebviewUri(localFileUri).toString();
                 } catch (e) {
                     console.error('Failed to parse file URI:', e);
                 }
