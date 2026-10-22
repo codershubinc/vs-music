@@ -42,12 +42,6 @@ function updatePlayPauseButton(status) {
 }
 
 function showNoMusic() {
-
-    if (progressUpdateInterval) {
-        clearInterval(progressUpdateInterval);
-        progressUpdateInterval = null;
-    }
-
     const musicInfoEl = document.getElementById('music-info');
     const noMusicEl = document.getElementById('no-music');
 
@@ -58,6 +52,8 @@ function showNoMusic() {
         noMusicEl.classList.remove('hidden');
     }
 
+    lastTitle = '';
+    lastStatusIndicator = '';
     currentTrack = null;
 }
 

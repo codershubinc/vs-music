@@ -194,41 +194,46 @@ export class ArtworkUtil {
      * Validate that a file is actually an image by checking magic bytes
      */
     private static async validateImage(filePath: string): Promise<boolean> {
+        let fileHandle: fs.promises.FileHandle | null = null;
         try {
-            const fileBuffer = await fs.promises.readFile(filePath);
+            fileHandle = await fs.promises.open(filePath, 'r');
+            const buffer = Buffer.alloc(4);
+            const { bytesRead } = await fileHandle.read(buffer, 0, 4, 0);
 
-            if (fileBuffer.length < 4) {
+            if (bytesRead < 4) {
                 return false;
             }
 
-            const magicBytes = fileBuffer.slice(0, 4);
-
             // PNG: 89 50 4E 47
-            if (magicBytes[0] === 0x89 &&
-                magicBytes[1] === 0x50 &&
-                magicBytes[2] === 0x4E &&
-                magicBytes[3] === 0x47) {
+            if (buffer[0] === 0x89 &&
+                buffer[1] === 0x50 &&
+                buffer[2] === 0x4E &&
+                buffer[3] === 0x47) {
                 return true;
             }
 
             // JPEG: FF D8 FF
-            if (magicBytes[0] === 0xFF &&
-                magicBytes[1] === 0xD8 &&
-                magicBytes[2] === 0xFF) {
+            if (buffer[0] === 0xFF &&
+                buffer[1] === 0xD8 &&
+                buffer[2] === 0xFF) {
                 return true;
             }
 
             // WebP: 52 49 46 46 (RIFF)
-            if (magicBytes[0] === 0x52 &&
-                magicBytes[1] === 0x49 &&
-                magicBytes[2] === 0x46 &&
-                magicBytes[3] === 0x46) {
+            if (buffer[0] === 0x52 &&
+                buffer[1] === 0x49 &&
+                buffer[2] === 0x46 &&
+                buffer[3] === 0x46) {
                 return true;
             }
 
             return false;
         } catch {
             return false;
+        } finally {
+            if (fileHandle) {
+                await fileHandle.close();
+            }
         }
     }
 

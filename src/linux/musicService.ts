@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import playerCtrlLinux from './utils/playerctl';
+import { getPlayerCtrlLinux, PlayerCtrlLinux } from './utils/playerctl';
 
 export interface TrackInfo {
     title: string;
@@ -13,13 +13,15 @@ export interface TrackInfo {
 }
 
 export class LinuxMusicService {
+    private playerCtrl: PlayerCtrlLinux;
+
     constructor(_context: vscode.ExtensionContext) {
-        // D-Bus is managed by the PLAYER_CONTROLLER_LINUX singleton
+        this.playerCtrl = getPlayerCtrlLinux();
     }
 
     /** Zero-cost — reads the in-memory state kept current by D-Bus signals */
     public async getCurrentTrack(): Promise<TrackInfo | null> {
-        const s = playerCtrlLinux.getState();
+        const s = this.playerCtrl.getState();
         if (!s.title && !s.artist) { return null; }
         return {
             title: s.title || 'Unknown Title',
@@ -35,33 +37,33 @@ export class LinuxMusicService {
 
     /** Zero-cost — returns cached position from the last PropertiesChanged signal */
     public async getPosition(): Promise<number | null> {
-        return playerCtrlLinux.getState().positionSecs;
+        return this.playerCtrl.getState().positionSecs;
     }
 
     public async playPause(): Promise<void> {
-        await playerCtrlLinux.playPause();
+        await this.playerCtrl.playPause();
     }
 
     public async next(): Promise<void> {
-        await playerCtrlLinux.next();
+        await this.playerCtrl.next();
     }
 
     public async previous(): Promise<void> {
-        await playerCtrlLinux.previous();
+        await this.playerCtrl.previous();
     }
 
     public onTrackChanged(callback: (track: TrackInfo | null) => void) {
-        playerCtrlLinux.onTrackChange(async () => {
+        this.playerCtrl.onTrackChange(async () => {
             callback(await this.getCurrentTrack());
         });
     }
 
     public get isAvailable(): boolean {
-        return playerCtrlLinux.isConnected;
+        return this.playerCtrl.isConnected;
     }
 
     public dispose() {
-        playerCtrlLinux.dispose();
+        this.playerCtrl.dispose();
     }
 }
 

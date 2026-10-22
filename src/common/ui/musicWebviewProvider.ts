@@ -14,15 +14,15 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     private _controller: IMusicController | null;
     private _updateTimer?: NodeJS.Timeout;
     private _context: vscode.ExtensionContext;
+    private _isSubscribed = false;
 
     // Artwork cache
     private _lastArtUrl = '';
-    private _lastArtworkDataUri = '';
     private _lastWebviewArtUri = '';
 
     constructor(context: vscode.ExtensionContext) {
         this._context = context;
-        this._controller = MusicControllerFactory.create(context, this._view?.webview);
+        this._controller = null;
     }
 
     public resolveWebviewView(
@@ -31,6 +31,10 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
+        if (this._controller) {
+            this._controller.dispose();
+            this._isSubscribed = false;
+        }
         this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
 
         webviewView.webview.options = {
@@ -71,16 +75,13 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                     await this.updateWebview();
                     break;
                 case 'playPause':
-                    await this._controller?.playPause();
-                    setTimeout(() => this.updateWebview(), 100);
+                    await this.playPause();
                     break;
                 case 'next':
-                    await this._controller?.next();
-                    setTimeout(() => this.updateWebview(), 100);
+                    await this.next();
                     break;
                 case 'previous':
-                    await this._controller?.previous();
-                    setTimeout(() => this.updateWebview(), 100);
+                    await this.previous();
                     break;
             }
         } catch (error) {
@@ -89,17 +90,21 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     }
 
     private startUpdates(): void {
-        if (this._updateTimer) { return; }
-
         if (process.platform === 'linux') {
-
-            this._controller?.onTrackChanged(() => {
-                this.updateWebview();
-            });
-
-            this._updateTimer = setInterval(() => { }, 2_147_483_647);
+            if (!this._isSubscribed && this._controller) {
+                this._controller.onTrackChanged(() => {
+                    this.updateWebview();
+                });
+                this._isSubscribed = true;
+            }
         } else {
-            this._updateTimer = setInterval(() => { this.updateWebview(); }, 1000);
+            if (this._updateTimer) {
+                return;
+            }
+            const interval = vscode.workspace.getConfiguration('music').get<number>('updateInterval', 2000);
+            this._updateTimer = setInterval(() => {
+                this.updateWebview();
+            }, interval);
         }
     }
 
@@ -127,60 +132,39 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
             }
 
             let webviewArtworkUri = '';
-            let artworkDataUri = '';
             const artUrl = trackInfo.artUrl || '';
 
             // Cache check
             if (artUrl && artUrl === this._lastArtUrl) {
                 webviewArtworkUri = this._lastWebviewArtUri;
-                artworkDataUri = this._lastArtworkDataUri;
             } else {
-                // OPTIMIZATION: Async file reading
-                try {
-
-                    const localPath = await ArtworkUtil.downloadArtwork(artUrl);
-                    if (localPath) {
-                        const fileUri = vscode.Uri.file(localPath);
-                        webviewArtworkUri = this._view!.webview.asWebviewUri(fileUri).toString();
-
-                        try {
-                            // CHANGE: fs.promises.readFile (Async) instead of readFileSync
-                            const buffer = await fs.promises.readFile(localPath);
-                            const ext = path.extname(localPath).toLowerCase();
-                            let mime = 'image/jpeg';
-                            if (ext === '.png') { mime = 'image/png'; }
-                            else if (ext === '.webp') { mime = 'image/webp'; }
-                            artworkDataUri = `data:${mime};base64,${buffer.toString('base64')}`;
-                        } catch (e) {
-                            console.warn('Failed to read artwork file:', e);
-                        }
+                if (artUrl.startsWith('file://')) {
+                    try {
+                        webviewArtworkUri = this._view.webview.asWebviewUri(vscode.Uri.parse(artUrl)).toString();
+                    } catch (e) {
+                        console.error('Failed to parse file URI:', e);
                     }
-                } catch (e) {
-                    console.warn('Artwork processing error:', e);
+                } else if (artUrl) {
+                    try {
+                        const localPath = await ArtworkUtil.downloadArtwork(artUrl);
+                        if (localPath) {
+                            const fileUri = vscode.Uri.file(localPath);
+                            webviewArtworkUri = this._view.webview.asWebviewUri(fileUri).toString();
+                        }
+                    } catch (e) {
+                        console.warn('Artwork processing error:', e);
+                    }
                 }
 
                 this._lastArtUrl = artUrl;
                 this._lastWebviewArtUri = webviewArtworkUri;
-                this._lastArtworkDataUri = artworkDataUri;
             }
 
-            // Fix file:// URIs using the webview API
-            let resolvedArtworkUri = trackInfo.artUrl || '';
-            if (resolvedArtworkUri.startsWith('file://')) {
-                try {
-                    const localFileUri = vscode.Uri.parse(resolvedArtworkUri); // skipping for now , for debugging
-                    // resolvedArtworkUri = this._view!.webview.asWebviewUri(localFileUri).toString();
-                } catch (e) {
-                    console.error('Failed to parse file URI:', e);
-                }
-            }
-
-            log('Sending track update to webview with artwork URI:', resolvedArtworkUri);
+            log('Sending track update to webview with artwork URI:', webviewArtworkUri);
             const msgSend = this._view.webview.postMessage({
                 command: 'updateTrack',
                 track: trackInfo,
-                artworkUri: resolvedArtworkUri,
-                artworkDataUri: artworkDataUri,
+                artworkUri: webviewArtworkUri,
             });
             console.log("Sent updateTrack message, result: ", msgSend);
 
@@ -217,6 +201,36 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    public async playPause(): Promise<void> {
+        if (!this._controller) {
+            this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
+        }
+        await this._controller.playPause();
+        setTimeout(() => {
+            this.updateWebview();
+        }, 100);
+    }
+
+    public async next(): Promise<void> {
+        if (!this._controller) {
+            this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
+        }
+        await this._controller.next();
+        setTimeout(() => {
+            this.updateWebview();
+        }, 100);
+    }
+
+    public async previous(): Promise<void> {
+        if (!this._controller) {
+            this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
+        }
+        await this._controller.previous();
+        setTimeout(() => {
+            this.updateWebview();
+        }, 100);
+    }
+
     public async forceUpdate(): Promise<void> {
         await this.updateWebview();
     }
@@ -228,6 +242,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     public dispose(): void {
         this.stopUpdates();
         this._controller?.dispose();
+        this._controller = null;
+        this._isSubscribed = false;
         this._view = undefined;
     }
 }

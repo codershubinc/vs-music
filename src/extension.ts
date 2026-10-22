@@ -17,7 +17,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				webviewProvider,
 				{
 					webviewOptions: {
-						retainContextWhenHidden: true
+						retainContextWhenHidden: false
 					}
 				}
 			)
@@ -38,7 +38,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 	const playPauseCommand = vscode.commands.registerCommand('vsMusic.playPause', async () => {
 		try {
 			if (webviewProvider) {
-				await webviewProvider.forceUpdate();
+				await webviewProvider.playPause();
 			}
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to play/pause: ${error}`);
@@ -48,7 +48,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 	const nextTrackCommand = vscode.commands.registerCommand('vsMusic.nextTrack', async () => {
 		try {
 			if (webviewProvider) {
-				await webviewProvider.forceUpdate();
+				await webviewProvider.next();
 			}
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to skip to next track: ${error}`);
@@ -58,7 +58,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
 	const previousTrackCommand = vscode.commands.registerCommand('vsMusic.previousTrack', async () => {
 		try {
 			if (webviewProvider) {
-				await webviewProvider.forceUpdate();
+				await webviewProvider.previous();
 			}
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to go to previous track: ${error}`);

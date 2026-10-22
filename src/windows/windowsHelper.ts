@@ -1,5 +1,5 @@
 import { spawn, ChildProcessWithoutNullStreams } from "child_process";
-import { readFile, readFileSync } from "fs";
+import * as fs from "fs";
 import path from "path";
 import vscode from "vscode";
 
@@ -11,10 +11,14 @@ let globleWebViewContext: vscode.ExtensionContext | undefined;
 let vscodeWebview: vscode.Webview | undefined;
 
 export const startHelper = () => {
+    if (winHelper) {
+        return;
+    }
+
+    console.log("Starting the windows helper .....");
     // Spawn the exe
     const wb = spawn(exe);
     winHelper = wb;
-    console.log("Starting the windows helper .....");
 
     // =========================================================
     // GLOBAL READ LOGIC (Handles all incoming data)
@@ -44,6 +48,11 @@ export const startHelper = () => {
         console.error("Helper Error:", data.toString());
     });
 
+    wb.on("error", (err) => {
+        console.error("Helper process error:", err);
+        winHelper = null;
+    });
+
     // Use 'close', not 'disconnect'. 'disconnect' is only for Node IPC.
     wb.on("close", (code) => {
         console.log(`wb exited with code ${code}`);
@@ -51,32 +60,75 @@ export const startHelper = () => {
     });
 };
 
+export const stopHelper = () => {
+    if (winHelper) {
+        try {
+            winHelper.kill();
+        } catch (err) {
+            console.error("Error killing helper process:", err);
+        }
+        winHelper = null;
+    }
+    lastTrackState = null;
+    CurrentArtworkUri = "";
+    cachedArtworkUri = "";
+};
+
+interface TrackState {
+    title: string;
+    artist: string;
+    album: string;
+    status: string;
+    artworkUri: string;
+}
+
+let lastTrackState: TrackState | null = null;
+
 // This function decides what to do when the exe speaks
-const onMessageReceived = (response: string) => {
+const onMessageReceived = async (response: string) => {
     try {
         const res = JSON.parse(response);
         console.log("Got response:", res);
         if (vscodeWebview && res["Title"]) {
             console.log("Got music info updating ....");
 
-            //  updateTrack(message.track, artworkToUse, message.position, message.showProgressBar);
+            const title = res["Title"] || "";
+            const artist = res["Artist"] || "";
+            const album = res["Album"] || "";
+            const status = res["Status"] || "";
+            const artworkUri = res["ArtworkUri"] || "";
+
+            if (
+                lastTrackState &&
+                lastTrackState.title === title &&
+                lastTrackState.artist === artist &&
+                lastTrackState.album === album &&
+                lastTrackState.status === status &&
+                lastTrackState.artworkUri === artworkUri
+            ) {
+                return;
+            }
+
+            lastTrackState = { title, artist, album, status, artworkUri };
+
+            const resolvedArtworkUri = await handleArtwork(artworkUri);
+
             const curateTrack = {
-                title: res["Title"],
-                artist: res["Artist"],
-                album: res["Album"],
-                status: res["Status"],
-                artworkUri: res["ArtworkUri"]
+                title,
+                artist,
+                album,
+                status,
+                artworkUri
             };
 
-            return vscodeWebview.postMessage({
+            await vscodeWebview.postMessage({
                 command: 'updateTrack',
                 track: curateTrack,
-                artworkUri: handleArtwork(res["ArtworkUri"])
+                artworkUri: resolvedArtworkUri
             });
+            return;
         }
         console.log("Got incorrect music info .....", res["Title"]);
-
-        return JSON.parse(response);
     } catch (err) {
         console.error("Error processing response:", err);
     }
@@ -99,7 +151,7 @@ export const handleWinMessage = (
         console.log("Sending msg:", message);
 
         // Always add \n so the exe knows the command is finished
-        winHelper.stdin.write(message + "\n"); // 
+        winHelper.stdin.write(message + "\n");
         // No need to wait for a response here
     } else {
         globleWebViewContext = undefined;
@@ -108,14 +160,40 @@ export const handleWinMessage = (
 };
 
 let CurrentArtworkUri: string = "";
-let imageBytes = "";
-const handleArtwork = (uri: string) => {
+let cachedArtworkUri: string = "";
 
-    if (CurrentArtworkUri === uri && imageBytes) { return imageBytes; };
+const handleArtwork = async (uri: string): Promise<string> => {
+    if (!uri) {
+        return "";
+    }
 
-    const buff = readFileSync(uri, {}); // reading image file with no parameters
-    const data = buff.toString("base64"); //converting to string with base 64 encoding
-    if (!data) return "";
-    imageBytes = "data:image/jpeg;base64," + data; //the header is stick to /jpeg coz from the QuazaarMedia.exe it only returns the .jpg format image  
-    return imageBytes;
+    if (CurrentArtworkUri === uri && cachedArtworkUri) {
+        return cachedArtworkUri;
+    }
+
+    CurrentArtworkUri = uri;
+
+    if (vscodeWebview) {
+        try {
+            cachedArtworkUri = vscodeWebview.asWebviewUri(vscode.Uri.file(uri)).toString();
+            return cachedArtworkUri;
+        } catch (err) {
+            console.warn("Failed to convert artwork uri with asWebviewUri:", err);
+        }
+    }
+
+    try {
+        const buff = await fs.promises.readFile(uri);
+        const data = buff.toString("base64");
+        if (!data) {
+            cachedArtworkUri = "";
+            return "";
+        }
+        cachedArtworkUri = "data:image/jpeg;base64," + data;
+        return cachedArtworkUri;
+    } catch (err) {
+        console.warn("Failed to read artwork file async:", err);
+        cachedArtworkUri = "";
+        return "";
+    }
 };

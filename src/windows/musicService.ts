@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { TrackInfo, IMusicController } from "../common/models/models";
-import { handleWinMessage, startHelper } from "./windowsHelper";
+import { handleWinMessage, startHelper, stopHelper } from "./windowsHelper";
 
 export class WindowsMusicController implements IMusicController {
     private context: vscode.ExtensionContext | undefined;
@@ -46,7 +46,7 @@ export class WindowsMusicController implements IMusicController {
     onTrackChanged(_callback: () => void) {
     }
     dispose() {
-        // cleanup
+        stopHelper();
     }
     startPolling(): Promise<Boolean | undefined> {
         return Promise.resolve(true);

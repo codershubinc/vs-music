@@ -31,7 +31,6 @@ body::-webkit-scrollbar {
     box-sizing: border-box;
     overflow: hidden;
     position: relative;
-    backdrop-filter: blur(3px) saturate(1.2);
     z-index: 1;
 }
 
@@ -43,11 +42,12 @@ body::-webkit-scrollbar {
     width: 100%;
     height: 100%;
     opacity: 0.2;
-    filter: blur(10px);
+    filter: blur(4px);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
     z-index: -1;
+    will-change: transform;
 }
 
 /* Visibility states */
@@ -232,12 +232,12 @@ body::-webkit-scrollbar {
     0%,
     100% {
         transform: scale(1);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        opacity: 1;
     }
 
     50% {
         transform: scale(1.1);
-        box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+        opacity: 0.8;
     }
 }
 
@@ -388,19 +388,6 @@ body::-webkit-scrollbar {
     font-size: 48px;
     margin-bottom: 16px;
     opacity: 0.6;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-8px);
-    }
 }
 
 .no-music-container h2 {
