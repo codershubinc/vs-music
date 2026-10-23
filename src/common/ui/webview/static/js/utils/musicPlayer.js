@@ -21,11 +21,16 @@ import { showNoMusic, updateArtwork, updatePlayPauseButton, updateStatusIndicato
         }
     });
 
-    // Initialize when DOM is ready
-    document.addEventListener('DOMContentLoaded', function () {
+    function onReady() {
         initializeControls();
         vscode.postMessage({ command: 'webviewReady' });
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onReady);
+    } else {
+        onReady();
+    }
 
     function initializeControls() {
         const playPauseBtn = document.getElementById('play-pause-btn');
@@ -53,6 +58,7 @@ import { showNoMusic, updateArtwork, updatePlayPauseButton, updateStatusIndicato
 
     function updateTrack(track, artworkUri) {
         if (!track || !track.title) {
+            currentTrack = null;
             showNoMusic();
             return;
         }

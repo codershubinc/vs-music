@@ -50,7 +50,8 @@
     "dist",
     "LICENSE",
     "README.md",
-    "icon.png"
+    "icon.png",
+    "resources"
   ],
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -83,17 +84,17 @@
       {
         "command": "vsMusic.nextTrack",
         "title": "Music: Next Track",
-        "icon": "$(chevron-right)"
+        "icon": "$(debug-step-over)"
       },
       {
         "command": "vsMusic.previousTrack",
         "title": "Music: Previous Track",
-        "icon": "$(chevron-left)"
+        "icon": "$(debug-step-back)"
       },
       {
         "command": "vsMusic.showMusicPanel",
         "title": "Music: Show Music Panel",
-        "icon": "$(music)"
+        "icon": "$(unmute)"
       }
     ],
     "views": {
@@ -103,13 +104,29 @@
           "id": "vsMusicPlayer",
           "name": "Music Player",
           "when": "true",
-          "icon": "$(music)",
+          "icon": "resources/icons/music.svg",
           "visibility": "visible"
         }
       ]
     },
     "menus": {
-      "view/title": []
+      "view/title": [
+        {
+          "command": "vsMusic.previousTrack",
+          "when": "view == vsMusicPlayer",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vsMusic.playPause",
+          "when": "view == vsMusicPlayer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "vsMusic.nextTrack",
+          "when": "view == vsMusicPlayer",
+          "group": "navigation@3"
+        }
+      ]
     },
     "configuration": {
       "title": "VS Music",

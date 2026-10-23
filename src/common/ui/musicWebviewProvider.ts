@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 import { ArtworkUtil } from '../../linux/utils/artworkUtil';
 import { IMusicController } from '../models/models';
@@ -19,10 +20,16 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
     // Artwork cache
     private _lastArtUrl = '';
     private _lastWebviewArtUri = '';
+    private _lastSentTrackJson = '';
+    private _isWebviewReady = false;
 
     constructor(context: vscode.ExtensionContext) {
         this._context = context;
-        this._controller = null;
+        if (process.platform === 'linux') {
+            this._controller = MusicControllerFactory.create(context, undefined);
+        } else {
+            this._controller = null;
+        }
     }
 
     public resolveWebviewView(
@@ -31,18 +38,30 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         _token: vscode.CancellationToken,
     ) {
         this._view = webviewView;
-        if (this._controller) {
+        this._isWebviewReady = false;
+        this._lastSentTrackJson = '';
+
+        if (!this._controller) {
+            this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
+        } else if (process.platform === 'win32') {
+            this.stopUpdates();
             this._controller.dispose();
             this._isSubscribed = false;
+            this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
         }
-        this._controller = MusicControllerFactory.create(this._context, this._view?.webview);
+
+        const localRoots = [
+            vscode.Uri.file(this._context.extensionPath),
+            this._context.globalStorageUri,
+            vscode.Uri.file(os.homedir())
+        ];
+        if (process.platform === 'linux' || process.platform === 'darwin') {
+            localRoots.push(vscode.Uri.file('/home'), vscode.Uri.file('/tmp'));
+        }
 
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [
-                vscode.Uri.file(this._context.extensionPath),
-                vscode.Uri.file('/home')
-            ]
+            localResourceRoots: localRoots
         };
 
         webviewView.webview.html = this._getHtml();
@@ -56,7 +75,7 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         webviewView.onDidChangeVisibility(() => {
             if (webviewView.visible) {
                 this.startUpdates();
-                this.updateWebview();
+                this.updateWebview(true);
             } else {
                 this.stopUpdates();
             }
@@ -72,7 +91,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         try {
             switch (message.command) {
                 case 'webviewReady':
-                    await this.updateWebview();
+                    this._isWebviewReady = true;
+                    await this.updateWebview(true);
                     break;
                 case 'playPause':
                     await this.playPause();
@@ -115,19 +135,35 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private async updateWebview(): Promise<void> {
+    private async updateWebview(force: boolean = false): Promise<void> {
         if (!this._view || !this._view.visible) { return; }
 
         try {
             const trackInfo = await this._controller?.getCurrentTrack();
             console.log("Updating track info ", trackInfo);
 
-
             if (process.platform === 'win32') { return; }
 
             if (!trackInfo || !trackInfo.title) {
-                log('No track info available, clearing webview');
-                this._view.webview.postMessage({ command: 'updateTrack', track: null });
+                if (force || this._lastSentTrackJson !== 'null') {
+                    if (this._isWebviewReady) {
+                        this._lastSentTrackJson = 'null';
+                    }
+                    log('No track info available, clearing webview');
+                    this._view.webview.postMessage({ command: 'updateTrack', track: null });
+                }
+                return;
+            }
+
+            const currentTrackKey = JSON.stringify({
+                title: trackInfo.title,
+                artist: trackInfo.artist,
+                album: trackInfo.album,
+                status: trackInfo.status,
+                artUrl: trackInfo.artUrl || ''
+            });
+
+            if (!force && this._lastSentTrackJson === currentTrackKey) {
                 return;
             }
 
@@ -144,6 +180,14 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
                     } catch (e) {
                         console.error('Failed to parse file URI:', e);
                     }
+                } else if (artUrl.startsWith('/')) {
+                    try {
+                        webviewArtworkUri = this._view.webview.asWebviewUri(vscode.Uri.file(artUrl)).toString();
+                    } catch (e) {
+                        console.error('Failed to parse file path:', e);
+                    }
+                } else if (artUrl.startsWith('http://') || artUrl.startsWith('https://')) {
+                    webviewArtworkUri = artUrl;
                 } else if (artUrl) {
                     try {
                         const localPath = await ArtworkUtil.downloadArtwork(artUrl);
@@ -158,6 +202,10 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
 
                 this._lastArtUrl = artUrl;
                 this._lastWebviewArtUri = webviewArtworkUri;
+            }
+
+            if (this._isWebviewReady) {
+                this._lastSentTrackJson = currentTrackKey;
             }
 
             log('Sending track update to webview with artwork URI:', webviewArtworkUri);
@@ -207,7 +255,7 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         }
         await this._controller.playPause();
         setTimeout(() => {
-            this.updateWebview();
+            this.updateWebview(true);
         }, 100);
     }
 
@@ -217,7 +265,7 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         }
         await this._controller.next();
         setTimeout(() => {
-            this.updateWebview();
+            this.updateWebview(true);
         }, 100);
     }
 
@@ -227,12 +275,12 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         }
         await this._controller.previous();
         setTimeout(() => {
-            this.updateWebview();
+            this.updateWebview(true);
         }, 100);
     }
 
     public async forceUpdate(): Promise<void> {
-        await this.updateWebview();
+        await this.updateWebview(true);
     }
 
     public show(): void {
@@ -244,6 +292,8 @@ export class MusicWebviewProvider implements vscode.WebviewViewProvider {
         this._controller?.dispose();
         this._controller = null;
         this._isSubscribed = false;
+        this._isWebviewReady = false;
+        this._lastSentTrackJson = '';
         this._view = undefined;
     }
 }

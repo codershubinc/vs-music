@@ -69,6 +69,8 @@ export const stopHelper = () => {
         }
         winHelper = null;
     }
+    vscodeWebview = undefined;
+    globleWebViewContext = undefined;
     lastTrackState = null;
     CurrentArtworkUri = "";
     cachedArtworkUri = "";
@@ -144,7 +146,7 @@ export const handleWinMessage = (
 ) => {
     if (winHelper && winHelper.stdin.writable) {
         globleWebViewContext = context;
-        if (!vscodeWebview) {
+        if (webview) {
             vscodeWebview = webview;
         }
         // Log the outgoing message for debugging

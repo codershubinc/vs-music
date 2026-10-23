@@ -62,6 +62,10 @@ export class PlayerCtrlLinux {
 
             this._process.on('close', (_code) => {
                 if (!this.isDisposed) {
+                    if (this.state.title || this.state.artist || this.state.status !== 'stopped') {
+                        this.state = { ...EMPTY_STATE };
+                        this.onChange?.();
+                    }
                     const delay = this.retryDelay;
                     this.retryDelay = Math.min(this.retryDelay * 2, 15000);
                     this.retryTimer = setTimeout(() => {
@@ -89,14 +93,18 @@ export class PlayerCtrlLinux {
             const durationMicros = parseInt(parts[5] || '0', 10);
             const durationSecs = Math.floor(durationMicros / 1_000_000);
 
-            if (
-                this.state.status === status &&
-                this.state.title === title &&
-                this.state.artist === artist &&
-                this.state.album === album &&
-                this.state.artUrl === artUrl &&
-                this.state.durationSecs === durationSecs
-            ) {
+            // Check if core metadata/playback status actually changed before notifying UI.
+            // Ignore mpris:length microsecond jitter so periodic D-Bus property ticks do not trigger onChange.
+            const hasChanged =
+                this.state.status !== status ||
+                this.state.title !== title ||
+                this.state.artist !== artist ||
+                this.state.album !== album ||
+                this.state.artUrl !== artUrl;
+
+            this.state.durationSecs = durationSecs;
+
+            if (!hasChanged) {
                 return;
             }
 
@@ -106,7 +114,6 @@ export class PlayerCtrlLinux {
             this.state.artist = artist;
             this.state.album = album;
             this.state.artUrl = artUrl;
-            this.state.durationSecs = durationSecs;
 
             // Notify UI
             this.onChange?.();
@@ -117,6 +124,7 @@ export class PlayerCtrlLinux {
 
     private killProcess() {
         if (this._process) {
+            this._process.removeAllListeners();
             this._process.kill();
             this._process = null;
         }
@@ -128,20 +136,36 @@ export class PlayerCtrlLinux {
 
     // --- Public API ---
 
+    public ensureProcess() {
+        if (!this._process && !this.isDisposed) {
+            if (this.retryTimer) {
+                clearTimeout(this.retryTimer);
+                this.retryTimer = null;
+            }
+            this.retryDelay = 2000;
+            this.startProcess();
+        }
+    }
+
     get isConnected(): boolean {
         return this._process !== null && !this.isDisposed;
     }
 
     getState(): Readonly<MprisTrackState> {
+        this.ensureProcess();
         return this.state;
     }
 
     onTrackChange(cb: () => void) {
         this.onChange = cb;
+        if (this.state.title || this.state.artist || this.state.status !== 'stopped') {
+            cb();
+        }
     }
 
     // Control commands spawn a temporary process (fire and forget)
     playPause() {
+        this.ensureProcess();
         try {
             const p = spawn('playerctl', ['play-pause']);
             p.on('error', (e) => { console.warn('playerctl play-pause error:', e); });
@@ -151,6 +175,7 @@ export class PlayerCtrlLinux {
     }
 
     next() {
+        this.ensureProcess();
         try {
             const p = spawn('playerctl', ['next']);
             p.on('error', (e) => { console.warn('playerctl next error:', e); });
@@ -160,6 +185,7 @@ export class PlayerCtrlLinux {
     }
 
     previous() {
+        this.ensureProcess();
         try {
             const p = spawn('playerctl', ['previous']);
             p.on('error', (e) => { console.warn('playerctl previous error:', e); });
