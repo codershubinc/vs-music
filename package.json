@@ -195,9 +195,12 @@
     "build-vsix": "bun run package && bun run vsce:package",
     "package:win": "bun run package:win-build && vsce package --target win32-x64",
     "package:linux": "bun run package:linux-build && vsce package --target linux-x64",
+    "package:all": "sh scripts/build.sh all",
     "publish:win": "bun run package:win-build && vsce publish --target win32-x64",
     "publish:linux": "bun run package:linux-build && vsce publish --target linux-x64",
-    "publish:all": "bun run publish:win && bun run publish:linux"
+    "publish:all": "sh scripts/publish.sh",
+    "publish:marketplace": "sh scripts/publish.sh --marketplace-only",
+    "publish:openvsx": "sh scripts/publish.sh --openvsx-only"
   },
   "dependencies": {
     "dbus-next": "^0.10.2",
