@@ -7,6 +7,9 @@ import InfoSection from '@/components/vs-music/InfoSection';
 import FeatureGrid from '@/components/vs-music/FeatureGrid';
 import Footer from '@/components/vs-music/Footer';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function VSMusicPage() {
   const [installCount, ghStats] = await Promise.all([
     getInstallCount(),

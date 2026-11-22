@@ -71,7 +71,7 @@ export default function InfoSection({ ghStats }: { ghStats: GitHubStats }) {
                             <div className="space-y-4 font-mono text-sm text-[#888]">
                                 <div className="flex justify-between">
                                     <span>Latest Version</span>
-                                    <span className="text-green-500">{ghStats?.version || 'v0.2.0'}</span>
+                                    <span className="text-green-500">{ghStats?.version || 'v0.2.3'}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Open Issues</span>

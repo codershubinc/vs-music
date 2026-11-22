@@ -5,6 +5,7 @@ set -eu
 # Usage: sh scripts/build.sh [all|linux|win] [--no-lint] [--no-clean]
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD_DIR="$ROOT_DIR/build"
 cd "$ROOT_DIR"
 
 TARGET="all"
@@ -39,11 +40,14 @@ for arg in "$@"; do
       echo ""
       echo "Options:"
       echo "  --no-lint   Skip running ESLint"
-      echo "  --no-clean  Preserve existing .vsix files"
+      echo "  --no-clean  Preserve existing .vsix files in build/"
       exit 0
       ;;
   esac
 done
+
+# Ensure build directory exists
+mkdir -p "$BUILD_DIR"
 
 # Detect package runner: bun or npm
 if command -v bun >/dev/null 2>&1; then
@@ -54,21 +58,22 @@ fi
 
 echo "========================================="
 echo "  VS Music Extension - Build Pipeline    "
-echo "  Target: $TARGET | Runner: $RUNNER       "
+echo "  Target: $TARGET | Output: build/        "
+echo "  Runner: $RUNNER                        "
 echo "========================================="
 
-# Clean stale packages if requested
+# Clean stale packages in build/ if requested
 if [ "$CLEAN" -eq 1 ]; then
-  echo "==> Cleaning old .vsix packages..."
+  echo "==> Cleaning old .vsix packages in build/..."
   case "$TARGET" in
     linux)
-      rm -f music-linux-x64-*.vsix
+      rm -f "$BUILD_DIR"/music-linux-x64-*.vsix
       ;;
     win)
-      rm -f music-win32-x64-*.vsix
+      rm -f "$BUILD_DIR"/music-win32-x64-*.vsix
       ;;
     all)
-      rm -f music-linux-x64-*.vsix music-win32-x64-*.vsix
+      rm -f "$BUILD_DIR"/music-*.vsix
       ;;
   esac
 fi
@@ -80,7 +85,7 @@ if [ "$DO_LINT" -eq 1 ]; then
 fi
 
 build_linux() {
-  echo "==> Building & packaging Linux target (linux-x64)..."
+  echo "==> Building & packaging Linux target (linux-x64) -> build/..."
   $RUNNER package:linux
 }
 
@@ -91,7 +96,7 @@ build_win() {
     echo "Ensure QuazaarMedia.exe is present in src/windows/ before packaging." >&2
     exit 1
   fi
-  echo "==> Building & packaging Windows target (win32-x64)..."
+  echo "==> Building & packaging Windows target (win32-x64) -> build/..."
   $RUNNER package:win
 }
 
@@ -115,5 +120,6 @@ esac
 echo ""
 echo "========================================="
 echo "  Build Finished Successfully!           "
+echo "  Output directory: build/               "
 echo "========================================="
-ls -lh music-*-*.vsix 2>/dev/null || true
+ls -lh "$BUILD_DIR"/music-*-*.vsix 2>/dev/null || true

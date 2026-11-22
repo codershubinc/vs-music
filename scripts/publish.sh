@@ -5,6 +5,7 @@ set -eu
 # Usage: sh scripts/publish.sh [options] [all|linux|win]
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD_DIR="$ROOT_DIR/build"
 cd "$ROOT_DIR"
 
 DRY_RUN=0
@@ -74,31 +75,36 @@ echo "  VS Music Extension - Publish Pipeline  "
 echo "  Target: $TARGET | Dry Run: $DRY_RUN    "
 echo "========================================="
 
-# Helper to find latest matching vsix
+# Helper to find latest matching vsix in build/ (or fallback to root)
 find_vsix() {
-  pattern="$1"
-  # Find latest matching vsix file
-  ls -t $pattern 2>/dev/null | head -n 1 || true
+  prefix="$1"
+  # First check build/ directory
+  file=$(ls -t "$BUILD_DIR"/music-"$prefix"-*.vsix 2>/dev/null | head -n 1 || true)
+  if [ -z "$file" ] || [ ! -f "$file" ]; then
+    # Fallback to root directory
+    file=$(ls -t "$ROOT_DIR"/music-"$prefix"-*.vsix 2>/dev/null | head -n 1 || true)
+  fi
+  echo "$file"
 }
 
 PACKAGES=""
 
 if [ "$TARGET" = "linux" ] || [ "$TARGET" = "all" ]; then
-  LINUX_VSIX=$(find_vsix "music-linux-x64-*.vsix")
+  LINUX_VSIX=$(find_vsix "linux-x64")
   if [ -z "$LINUX_VSIX" ]; then
     echo "==> Linux package missing. Building via scripts/build.sh linux..."
     sh "$ROOT_DIR/scripts/build.sh" linux --no-clean
-    LINUX_VSIX=$(find_vsix "music-linux-x64-*.vsix")
+    LINUX_VSIX=$(find_vsix "linux-x64")
   fi
   PACKAGES="$PACKAGES $LINUX_VSIX"
 fi
 
 if [ "$TARGET" = "win" ] || [ "$TARGET" = "all" ]; then
-  WIN_VSIX=$(find_vsix "music-win32-x64-*.vsix")
+  WIN_VSIX=$(find_vsix "win32-x64")
   if [ -z "$WIN_VSIX" ]; then
     echo "==> Windows package missing. Building via scripts/build.sh win..."
     sh "$ROOT_DIR/scripts/build.sh" win --no-clean
-    WIN_VSIX=$(find_vsix "music-win32-x64-*.vsix")
+    WIN_VSIX=$(find_vsix "win32-x64")
   fi
   PACKAGES="$PACKAGES $WIN_VSIX"
 fi

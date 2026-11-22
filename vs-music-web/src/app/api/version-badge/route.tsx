@@ -2,6 +2,9 @@ import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { getGitHubStats } from '@/app/github-stats';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function generateSVG(version: string): string {
     const label = 'version';
     const labelWidth = Math.round(label.length * 6.5 + 16);
@@ -40,6 +43,12 @@ export async function GET(request: NextRequest) {
 
     const { version: raw } = await getGitHubStats();
     const version = raw ?? 'unknown';
+
+    const noCacheHeaders = {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+    };
 
     if (format === 'png') {
         const labelWidth = 68;
@@ -89,7 +98,11 @@ export async function GET(request: NextRequest) {
                     </div>
                 </div>
             ),
-            { width: totalWidth, height }
+            {
+                width: totalWidth,
+                height,
+                headers: noCacheHeaders
+            }
         );
     }
 
@@ -98,7 +111,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(svg, {
         headers: {
             'Content-Type': 'image/svg+xml',
-            'Cache-Control': 'public, max-age=3600, stale-while-revalidate=600',
+            ...noCacheHeaders,
         },
     });
 }

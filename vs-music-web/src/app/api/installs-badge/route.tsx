@@ -2,6 +2,9 @@ import { ImageResponse } from 'next/og';
 import { NextRequest, NextResponse } from 'next/server';
 import { getInstallCount } from '@/app/scraper';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function formatCount(count: number): string {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k+`;
     return count.toString();
@@ -46,6 +49,12 @@ export async function GET(request: NextRequest) {
     const rawCount = await getInstallCount();
     const count = rawCount ?? 0;
     const formatted = formatCount(count);
+
+    const noCacheHeaders = {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+    };
 
     if (format === 'png') {
         const labelWidth = 76;
@@ -95,7 +104,11 @@ export async function GET(request: NextRequest) {
                     </div>
                 </div>
             ),
-            { width: totalWidth, height }
+            {
+                width: totalWidth,
+                height,
+                headers: noCacheHeaders
+            }
         );
     }
 
@@ -104,7 +117,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(svg, {
         headers: {
             'Content-Type': 'image/svg+xml',
-            'Cache-Control': 'public, max-age=3600, stale-while-revalidate=600',
+            ...noCacheHeaders,
         },
     });
 }

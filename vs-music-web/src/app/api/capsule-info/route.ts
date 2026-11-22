@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getInstallCount } from '@/app/scraper';
 import { getGitHubStats } from '@/app/github-stats';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
     try {
         const [installs, githubStats] = await Promise.all([
