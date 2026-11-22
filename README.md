@@ -1,6 +1,6 @@
 # VS Music Extension for VS Code
 
-![Installs](https://vsmusic.codershubinc.com/api/installs-badge?format=png)
+![Installs](https://vsmusic.codershubinc.com/api/installs-badge?format=svg)
 ![VS Music Icon](https://img.shields.io/badge/VS%20Code-Music%20Extension-blue?logo=visual-studio-code)
 ![Windows](https://img.shields.io/badge/Windows-Compatible-blue?logo=windows)
 ![Linux](https://img.shields.io/badge/Linux-Compatible-green?logo=linux)
