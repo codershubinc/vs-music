@@ -5,6 +5,40 @@ All notable changes to the VS Music extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Planned Features
+
+- Direct D-Bus MPRIS client implementation on Linux to eliminate external `playerctl` dependency
+- macOS media session integration
+- Playlist browsing and quick track search
+
+## [0.2.3] - 2026-10-24
+
+### Added
+
+- **Modern SVG Icons**: Replaced hardcoded emojis with crisp, scalable inline SVG icons across webview templates and themes.
+- **Custom View Icon**: Added monochrome `music.svg` icon in `resources/icons` for the VS Code activity bar and explorer panel.
+- **Title Bar Action Controls**: Added direct playback controls (previous, play/pause, next) to the explorer view header menu (`view/title`).
+- **Standard Codicons**: Integrated standard VS Code Codicons (`$(play)`, `$(debug-step-over)`, `$(debug-step-back)`, `$(unmute)`) for all extension commands.
+- **Auto-reconnect on Command**: Added `ensureProcess()` in Linux player controller to automatically reconnect `playerctl` when commands or state queries occur.
+
+### Fixed
+
+- **Initial State Delivery Race Condition**: Introduced `_isWebviewReady` state tracking in `MusicWebviewProvider` and bypass deduplication on initial load so tracks render immediately.
+- **Strict Mode ReferenceErrors**: Fixed undeclared variable references (`currentTrack`, `progressUpdateInterval`) in `musicUI.js`.
+- **Preloaded Module ReadyState**: Added `document.readyState` verification before binding `DOMContentLoaded` in `musicPlayer.js` to prevent missed load events.
+- **Player Close State Reset**: Reset internal controller state to `EMPTY_STATE` and clear webview UI immediately when the active media player is closed.
+- **Artwork Loading & Caching**: Added retry logic with cache-busting for newly written artwork files, and proper URI resolution across `file://`, absolute filesystem paths, and web URLs.
+
+### Performance & Optimization
+
+- **Zero Idle GPU/CPU Overhead**: Removed continuous 60fps repaint loops (pulse animations and backdrop filters) in webview stylesheets; promoted background overlay to static GPU layer (`translateZ(0)`).
+- **Webview Resource Reclamation**: Configured `retainContextWhenHidden: false` to allow Chromium webview disposal when the panel is hidden.
+- **Non-blocking Artwork I/O**: Replaced synchronous `readFileSync` and Base64 buffer encoding with asynchronous `asWebviewUri` for local artwork images.
+- **Process Lifecycle Guard**: Added single-instance process guards and cleanup for `QuazaarMedia.exe` on Windows, and exponential backoff (2s–15s) for Linux `playerctl` reconnect attempts.
+- **State Deduplication**: Suppressed redundant `postMessage` transmissions when player state has not changed.
+
 ## [0.2.0] - 2025-12-16
 
 ### Added
@@ -197,14 +231,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Linux operating system
 - playerctl installed (`sudo apt install playerctl` on Ubuntu/Debian)
 - MPRIS-compatible media player
-
-## [Unreleased]
-
-### Planned Features
-
-- Windows support (coming soon)
-- macOS support (coming soon)
-- Additional customization options
-- Enhanced album art display
-- Playlist integration
-- More media player integrations
